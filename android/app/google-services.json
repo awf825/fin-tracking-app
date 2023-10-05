@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "558149320953",
+    "project_id": "payment-tracking-app",
+    "storage_bucket": "payment-tracking-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558149320953:android:b2cd7ca676fe4254e42228",
+        "android_client_info": {
+          "package_name": "com.example.payment_tracking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyhoHhz2gxMf3kd5uRIeW3zD6sOom_JtU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -6,10 +6,10 @@ import 'package:payment_tracking/widgets/new_payment.dart';
 class PaymentsScreen extends StatelessWidget {
   const PaymentsScreen({
     super.key, 
-    required this.data,
+    this.data = const []
   });
 
-  final List<Payment> data;
+  final List<Payment> ?data;
 
   List<DataColumn> getDataColumns(columnNames) {
     List<DataColumn> columns = [];
@@ -33,67 +33,69 @@ class PaymentsScreen extends StatelessWidget {
 
   List<DataRow> getDataTable() {
     List<DataRow> rows = [];
-    for (var d in data) {
-      rows.add(
-          DataRow(
-            cells: <DataCell>[
-              DataCell(
+    if (data != null) {
+      for (var d in data!) {
+        rows.add(
+            DataRow(
+              cells: <DataCell>[
+                DataCell(
+                    Text(
+                      d.id, 
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontStyle: FontStyle.italic
+                      ),
+                    )
+                ),
+                DataCell(
                   Text(
-                    d.id, 
+                    d.amount as String,
                     style: const TextStyle(
                       color: Colors.red,
                       fontStyle: FontStyle.italic
                     ),
                   )
-              ),
-              DataCell(
-                Text(
-                  d.amount,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontStyle: FontStyle.italic
-                  ),
-                )
-              ),
-              DataCell(
-                Text(
-                  d.date,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontStyle: FontStyle.italic
-                  ),
-                )
-              ),
-              DataCell(
-                Text(
-                  d.recipient,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontStyle: FontStyle.italic
-                  ),
-                )
-              ),
-              DataCell(
-                Text(
-                  d.category,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontStyle: FontStyle.italic
-                  ),
-                )
-              ),
-              DataCell(
-                Text(
-                  d.paymentMethod,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontStyle: FontStyle.italic
-                  ),
-                )
-              ),
-            ],
-          )
-        );
+                ),
+                DataCell(
+                  Text(
+                    d.date as String,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontStyle: FontStyle.italic
+                    ),
+                  )
+                ),
+                DataCell(
+                  Text(
+                    d.recipient,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontStyle: FontStyle.italic
+                    ),
+                  )
+                ),
+                DataCell(
+                  Text(
+                    d.categoryId,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontStyle: FontStyle.italic
+                    ),
+                  )
+                ),
+                DataCell(
+                  Text(
+                    d.paymentMethodId,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontStyle: FontStyle.italic
+                    ),
+                  )
+                ),
+              ],
+            )
+          );
+      }
     }
     return rows;
   }

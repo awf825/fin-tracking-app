@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:payment_tracking/screens/tabs.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+
 // final theme = ThemeData(
 //   useMaterial3: true,
 //   colorScheme: ColorScheme.fromSeed(
@@ -12,7 +16,11 @@ import 'package:payment_tracking/screens/tabs.dart';
 //   textTheme: GoogleFonts.latoTextTheme(),
 // );
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     const ProviderScope(
       child: App(),
@@ -25,7 +33,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       // theme: theme,
       home: const TabsScreen()
     );

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_tracking/screens/payments.dart';
+import 'package:payment_tracking/services/data_service.dart';
 import 'package:payment_tracking/screens/categories.dart';
+
+import 'package:payment_tracking/providers/full_data_provider.dart';
 
 import '../models/payment.dart';
 import '../models/category.dart';
@@ -17,6 +20,28 @@ class TabsScreen extends ConsumerStatefulWidget {
 
 class _TabsScreenState extends ConsumerState<TabsScreen> {
   int _selectedPageIndex = 0;
+  final _dataService = DataService();
+  // final fullData = ref.watch(fullDataProvider);
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, () {
+      _loadItems();
+    });
+  }
+
+  Future<void> _loadItems() async {
+    final fullData = ref.watch(fullDataProvider);
+
+    print("<!!! -- Full Data before fetch $fullData -- !!!>");
+
+    if (fullData.entries.isEmpty) {
+      final allData = await _dataService.loadAll();
+      print("<!!! -- All Data after fetch $allData -- !!!>");
+      ref.read(fullDataProvider.notifier).setData(allData);
+    }
+  }
   
   void _selectPage(int index) {
     setState(() {
@@ -38,34 +63,25 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
 
   @override 
   Widget build(BuildContext context) {
-    // final availableMeals = ref.watch(filteredMealsProvider);
+    final fullData = ref.watch(fullDataProvider);
 
-    final data = [
-      const Payment(
-        id:"1",
-        amount:"1.00",
-        date:"08/17/2023",
-        recipient:"Aiden",
-        category: "Rent",
-        paymentMethod: "Citizens Bank Checking"
-      ),
-      const Payment(
-        id:"2",
-        amount:"1.00",
-        date:"08/17/2023",
-        recipient:"Aiden",
-        category: "Car",
-        paymentMethod: "Cash"
-      ),
-      const Payment(
-        id:"3",
-        amount:"1.00",
-        date:"08/17/2023",
-        recipient:"Aiden",
-        category: "Incidental",
-        paymentMethod: "Citi Bank Card"
-      ),
-    ];
+    print(fullData['payments']);
+    print("<!!! ---- !!!>");
+    print(fullData['paymentMethods']);
+    print("<!!! ---- !!!>");
+    print(fullData['streams']);
+    print("<!!! ---- !!!>");
+    print(fullData['categories']);
+
+    /*
+      type 'List<dynamic>' is not a subtype of type 'List<Payment>' in type cast
+
+      In gathering the data, the response needs to be defined as:
+
+      <Map<String, List<Payment> or List<Category> etc...>>
+    */
+
+    List<Payment> paymentData = ( fullData['payments'] ?? [] ) as List<Payment>;
 
     final categoryData = [
       const Category(name: "n", description: "d"),
@@ -73,7 +89,16 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     ];
 
     Widget activePage = PaymentsScreen(
-      data: data
+      data: paymentData.map((p) => {
+        Payment(
+          id: p.id ?? "",
+          amount:p.amount ?? "",
+          date:p.date ?? "",
+          recipient:p.recipient ?? "",
+          categoryId:p.categoryId ?? "",
+          paymentMethodId:p.paymentMethodId ?? ""
+        ),
+      }).toList() as List<Payment>
     );
 
     var activePageTitle = 'Payments';
