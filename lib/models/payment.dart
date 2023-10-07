@@ -1,25 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:payment_tracking/models/app_model.dart';
+import 'package:payment_tracking/models/category.dart';
+import 'package:payment_tracking/models/payment_method.dart';
 
-class Payment {
-  const Payment({
-    required this.id, 
+class Payment extends AppModel {
+  Payment({
+    this.id, 
+    this.paymentMethod,
+    this.category,
     required this.date,
     required this.recipient,
     required this.amount,
-    // required this.category,
-    // required this.paymentMethod,
     required this.paymentMethodId,
     required this.categoryId
   });
 
-  final String id;
+  final String ?id;
+  PaymentMethod ?paymentMethod;
+  Category ?category;
   final dynamic amount;
-  final dynamic date;
+  final Timestamp date;
   final String recipient;
-  // final String category;
-  // final String paymentMethod;
-
   final String categoryId;
   final String paymentMethodId;
+
+  void setPaymentMethod(paymentMethodToSet) {
+    paymentMethod = paymentMethodToSet;
+  }
+
+  void setCategory(categoryToSet) {
+    category = categoryToSet;
+  }
+
+  String readDate() {
+    return DateFormat.yMMMd().add_jm().format(date.toDate());
+  }
 }

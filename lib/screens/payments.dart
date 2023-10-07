@@ -39,17 +39,8 @@ class PaymentsScreen extends StatelessWidget {
             DataRow(
               cells: <DataCell>[
                 DataCell(
-                    Text(
-                      d.id, 
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontStyle: FontStyle.italic
-                      ),
-                    )
-                ),
-                DataCell(
                   Text(
-                    d.amount as String,
+                    d.amount.toString(),
                     style: const TextStyle(
                       color: Colors.red,
                       fontStyle: FontStyle.italic
@@ -58,7 +49,7 @@ class PaymentsScreen extends StatelessWidget {
                 ),
                 DataCell(
                   Text(
-                    d.date as String,
+                    d.readDate(),
                     style: const TextStyle(
                       color: Colors.red,
                       fontStyle: FontStyle.italic
@@ -76,7 +67,7 @@ class PaymentsScreen extends StatelessWidget {
                 ),
                 DataCell(
                   Text(
-                    d.categoryId,
+                    d.category!.name,
                     style: const TextStyle(
                       color: Colors.red,
                       fontStyle: FontStyle.italic
@@ -85,7 +76,7 @@ class PaymentsScreen extends StatelessWidget {
                 ),
                 DataCell(
                   Text(
-                    d.paymentMethodId,
+                    d.paymentMethod!.name,
                     style: const TextStyle(
                       color: Colors.red,
                       fontStyle: FontStyle.italic
@@ -128,7 +119,6 @@ class PaymentsScreen extends StatelessWidget {
           ),
           DataTable(
             columns: getDataColumns([
-              "ID",
               "Amount",
               "Date",
               "Recipient",
@@ -142,4 +132,3 @@ class PaymentsScreen extends StatelessWidget {
     );
   }
 }
-

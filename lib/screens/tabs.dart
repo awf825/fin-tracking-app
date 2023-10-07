@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:payment_tracking/models/income_stream.dart';
+import 'package:payment_tracking/models/payment_method.dart';
+import 'package:payment_tracking/screens/payment_methods.dart';
 import 'package:payment_tracking/screens/payments.dart';
+import 'package:payment_tracking/screens/streams.dart';
 import 'package:payment_tracking/services/data_service.dart';
 import 'package:payment_tracking/screens/categories.dart';
 
@@ -34,11 +38,21 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
   Future<void> _loadItems() async {
     final fullData = ref.watch(fullDataProvider);
 
-    print("<!!! -- Full Data before fetch $fullData -- !!!>");
-
     if (fullData.entries.isEmpty) {
-      final allData = await _dataService.loadAll();
-      print("<!!! -- All Data after fetch $allData -- !!!>");
+      // List<Payment> paymentData = await _dataService.getPayments();
+      // List<Category> categoryData = await _dataService.getCategories();
+      // List<IncomeStream> streamData = await _dataService.getStreams();
+      // List<PaymentMethod> paymentMethodData = await _dataService.getPaymentMethods();
+      // Map<String, List<dynamic>> allData = {
+      //   "payments": paymentData,
+      //   "categories": categoryData,
+      //   "streams": streamData,
+      //   "paymentMethods": paymentMethodData
+      // };
+      Map<String, List<dynamic>> allData = await _dataService.loadAll();
+      print("<!!! ---- !!!>");
+      print(allData);
+      print("<!!! ---- !!!>");
       ref.read(fullDataProvider.notifier).setData(allData);
     }
   }
@@ -64,55 +78,44 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
   @override 
   Widget build(BuildContext context) {
     final fullData = ref.watch(fullDataProvider);
+    Widget activePage;
+    String activePageTitle;
 
-    print(fullData['payments']);
-    print("<!!! ---- !!!>");
-    print(fullData['paymentMethods']);
-    print("<!!! ---- !!!>");
-    print(fullData['streams']);
-    print("<!!! ---- !!!>");
-    print(fullData['categories']);
-
-    /*
-      type 'List<dynamic>' is not a subtype of type 'List<Payment>' in type cast
-
-      In gathering the data, the response needs to be defined as:
-
-      <Map<String, List<Payment> or List<Category> etc...>>
-    */
-
-    List<Payment> paymentData = ( fullData['payments'] ?? [] ) as List<Payment>;
-
-    final categoryData = [
-      const Category(name: "n", description: "d"),
-      const Category(name: "n2", description: "d2")
-    ];
-
-    Widget activePage = PaymentsScreen(
-      data: paymentData.map((p) => {
-        Payment(
-          id: p.id ?? "",
-          amount:p.amount ?? "",
-          date:p.date ?? "",
-          recipient:p.recipient ?? "",
-          categoryId:p.categoryId ?? "",
-          paymentMethodId:p.paymentMethodId ?? ""
-        ),
-      }).toList() as List<Payment>
-    );
-
-    var activePageTitle = 'Payments';
-
-    if (_selectedPageIndex == 1) {
-      // final favoriteMeals = ref.watch(favoriteMealsProvider);
-
-      activePage = CategoriesScreen(
-        data: categoryData
-      );
-
-        // categories: categoriesData,
-      // );
-      activePageTitle = 'Categories';
+    switch(_selectedPageIndex) {
+      case 0: {
+        activePage = PaymentsScreen(
+          data: fullData["payments"] as List<Payment>?
+        );
+        activePageTitle = 'Payments';
+      }
+      break;
+      case 1: {
+        activePage = CategoriesScreen(
+          data: fullData["categories"] as List<Category>?
+        );
+        activePageTitle = 'Categories';
+      }
+      break;
+      case 2: {
+        activePage = StreamsScreen(
+          data: fullData["streams"] as List<IncomeStream>?
+        );
+        activePageTitle = 'Income Streams';
+      }
+      case 3: {
+        activePage = PaymentMethodsScreen(
+          data: fullData["paymentMethods"] as List<PaymentMethod>?
+        );
+        activePageTitle = 'Payment Methods';
+      }
+      break;
+      default: {
+        activePage = PaymentsScreen(
+          data: fullData["payments"] as List<Payment>?
+        );
+        activePageTitle = 'Payments';
+      }
+      break;
     }
 
     return Scaffold(
@@ -126,10 +129,13 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
       body: activePage,
       bottomNavigationBar: BottomNavigationBar(
         onTap: _selectPage,
+        type: BottomNavigationBarType.fixed,
         currentIndex: _selectedPageIndex,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.set_meal), label: "Categories",),
-          BottomNavigationBarItem(icon: Icon(Icons.star), label: "Favorites"),        
+          BottomNavigationBarItem(icon: Icon(Icons.paid), label: "Payments"),
+          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
+          BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: "Income"),
+          BottomNavigationBarItem(icon: Icon(Icons.payment), label: "Payment Methods")          
         ],
       ),
     );

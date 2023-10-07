@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_tracking/models/category.dart';
+import 'package:payment_tracking/models/income_stream.dart';
 import 'package:payment_tracking/widgets/new_category.dart';
 
-class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen({
+class StreamsScreen extends StatelessWidget {
+  const StreamsScreen({
     super.key, 
     this.data,
   });
 
-  final List<Category> ?data;
+  final List<IncomeStream> ?data;
 
   List<DataColumn> getDataColumns(columnNames) {
     List<DataColumn> columns = [];
@@ -36,29 +37,47 @@ class CategoriesScreen extends StatelessWidget {
     if (data != null) {
       for (var d in data!) {
         rows.add(
-            DataRow(
-              cells: <DataCell>[
-                DataCell(
-                    Text(
-                      d.name, 
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontStyle: FontStyle.italic
-                      ),
-                    )
-                ),
-                DataCell(
+          DataRow(
+            cells: <DataCell>[
+              DataCell(
                   Text(
-                    d.description,
+                    d.institution, 
                     style: const TextStyle(
                       color: Colors.red,
                       fontStyle: FontStyle.italic
                     ),
                   )
-                ),
-              ],
-            )
-          );
+              ),
+              DataCell(
+                Text(
+                  d.name,
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontStyle: FontStyle.italic
+                  ),
+                )
+              ),
+              DataCell(
+                Text(
+                  d.monthlyTotal.toString(),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontStyle: FontStyle.italic
+                  ),
+                )
+              ),
+              DataCell(
+                Text(
+                  d.yearlyTotal.toString(),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontStyle: FontStyle.italic
+                  ),
+                )
+              ),
+            ],
+          )
+        );
       }
     }
     return rows;
@@ -92,7 +111,7 @@ class CategoriesScreen extends StatelessWidget {
             onPressed: addItem,
           ),
           DataTable(
-            columns: getDataColumns(['Name', 'Description']),
+            columns: getDataColumns(['Institution', 'Name', 'Monthly Total', 'Yearly Total']),
             rows: getDataTable(),
           )
         ]

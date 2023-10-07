@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_tracking/models/category.dart';
+import 'package:payment_tracking/models/payment_method.dart';
 import 'package:payment_tracking/widgets/new_category.dart';
 
-class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen({
+class PaymentMethodsScreen extends StatelessWidget {
+  const PaymentMethodsScreen({
     super.key, 
     this.data,
   });
 
-  final List<Category> ?data;
+  final List<PaymentMethod> ?data;
 
   List<DataColumn> getDataColumns(columnNames) {
     List<DataColumn> columns = [];
@@ -46,16 +47,7 @@ class CategoriesScreen extends StatelessWidget {
                         fontStyle: FontStyle.italic
                       ),
                     )
-                ),
-                DataCell(
-                  Text(
-                    d.description,
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontStyle: FontStyle.italic
-                    ),
-                  )
-                ),
+                )
               ],
             )
           );
@@ -92,7 +84,7 @@ class CategoriesScreen extends StatelessWidget {
             onPressed: addItem,
           ),
           DataTable(
-            columns: getDataColumns(['Name', 'Description']),
+            columns: getDataColumns(['Name']),
             rows: getDataTable(),
           )
         ]
