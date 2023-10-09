@@ -3,14 +3,19 @@
 A new Flutter project.
 
 ## Getting Started
+```
+    open -a Simulator
+    flutter run
+```
+### Journal
+#### Oct 9 2023
+After striking out with Firebase app distribution tool I found an easier way to beta test on my iPhone by using App Store Connect and TestFlight. Followed along with this guide, which isn't terribly dated: https://iqan.medium.com/releasing-flutter-ios-app-to-testflight-using-xcode-21571299dbc3
 
-This project is a starting point for a Flutter application.
+The only difference in these steps is that I opted, for the moment, to only upload for internal teting purposes. It looks like ASC manages the certificate: https://developer.apple.com/account/resources/certificates/ (Testflight Provisioning Profile)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The general process is something like this:
+* Run 'flutter build ios'
+* Once that build is done, go to Product > Archive in the xCode UI.  
+* Select 'Distribute App' in the archive window, and choose Testflight/internal testing only.
+* Once that build is done, it should be available here: https://appstoreconnect.apple.com/apps/6468968760/testflight/ios 
+* "Internal Testing Group" should get email to install latest build on personal phone via locally installed Testflight app. 
