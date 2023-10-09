@@ -14,7 +14,7 @@ After striking out with Firebase app distribution tool I found an easier way to 
 The only difference in these steps is that I opted, for the moment, to only upload for internal teting purposes. It looks like ASC manages the certificate: https://developer.apple.com/account/resources/certificates/ (Testflight Provisioning Profile)
 
 The general process is something like this:
-* Run 'flutter build ios'
+* Run 'flutter build ios'.
 * Once that build is done, go to Product > Archive in the xCode UI.  
 * Select 'Distribute App' in the archive window, and choose Testflight/internal testing only.
 * Once that build is done, it should be available here: https://appstoreconnect.apple.com/apps/6468968760/testflight/ios 
