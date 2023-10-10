@@ -39,20 +39,7 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     final fullData = ref.watch(fullDataProvider);
 
     if (fullData.entries.isEmpty) {
-      // List<Payment> paymentData = await _dataService.getPayments();
-      // List<Category> categoryData = await _dataService.getCategories();
-      // List<IncomeStream> streamData = await _dataService.getStreams();
-      // List<PaymentMethod> paymentMethodData = await _dataService.getPaymentMethods();
-      // Map<String, List<dynamic>> allData = {
-      //   "payments": paymentData,
-      //   "categories": categoryData,
-      //   "streams": streamData,
-      //   "paymentMethods": paymentMethodData
-      // };
       Map<String, List<dynamic>> allData = await _dataService.loadAll();
-      print("<!!! ---- !!!>");
-      print(allData);
-      print("<!!! ---- !!!>");
       ref.read(fullDataProvider.notifier).setData(allData);
     }
   }
@@ -62,18 +49,6 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
       _selectedPageIndex = index;
     });
   }
-
-  // void _setScreen(String identifier) async {
-  //   Navigator.of(context).pop();
-  //   if (identifier == 'filters') {
-  //     final result = await Navigator.of(context).push<Map<Filter, bool>>(
-  //       MaterialPageRoute(
-  //         builder: (ctx) => const FiltersScreen(),
-  //       )
-  //     );
-  //     // print(result); // great debug
-  //   }
-  // }
 
   @override 
   Widget build(BuildContext context) {

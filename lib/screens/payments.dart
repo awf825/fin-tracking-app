@@ -107,7 +107,7 @@ class PaymentsScreen extends StatelessWidget {
       // may actually need this when this becomes staeful
 
       // setState(() {
-      //   _payments.add(newItem);
+      //   data?.add(newItem);
       // });
     }
     return Scaffold(

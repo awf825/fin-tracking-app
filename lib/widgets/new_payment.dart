@@ -1,68 +1,71 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:shopping_app/data/categories.dart';
 // import 'package:shopping_app/models/category.dart';
 // import 'package:shopping_app/models/grocery_item.dart';
-// import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http;
+import 'package:payment_tracking/models/category.dart';
+import 'package:payment_tracking/models/payment.dart';
+import 'package:payment_tracking/providers/full_data_provider.dart';
+import 'package:payment_tracking/services/data_service.dart';
 
-class NewPayment extends StatefulWidget {
-  const NewPayment({
-    super.key
-  });
+class NewPayment extends ConsumerStatefulWidget {
+  const NewPayment({super.key});
 
   @override
-  State<StatefulWidget> createState() {
+  ConsumerState<NewPayment> createState() {
     return _NewPaymentState();
   }
 }
 
-class _NewPaymentState extends State<NewPayment> {
-  // final _formKey = GlobalKey<FormState>();
-  // var _enteredName = '';
-  // var _enteredQuantity = 1;
-  // var _selectedCategory = categories[Categories.vegetables]!;
-  // var _isSending = false;
+class _NewPaymentState extends ConsumerState<NewPayment> {
+  final _formKey = GlobalKey<FormState>();
+  late final data = ref.watch(fullDataProvider);
+  final _dataService = DataService();
+  var _enteredRecipient = '';
+  var _enteredAmount = 0;  
+  var _selectedCategory;
+  var _selectedPaymentMethod;
+  var _isSending = false;
 
-  // void _saveItem() async {
-  //   if (_formKey.currentState!.validate()) {
-  //     _formKey.currentState!.save();
-  //     setState(() {
-  //       _isSending = true;
-  //     });
-  //     final url = Uri.https(
-  //       'flutter-prep-3abdd-default-rtdb.firebaseio.com', 
-  //       'shopping-list.json'
-  //     );
-  //     final response = await http.post(
-  //       url, 
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       }, 
-  //       body: json.encode(
-  //         {
-  //           'name': _enteredName, 
-  //           'quantity': _enteredQuantity, 
-  //           'category': _selectedCategory.title
-  //         },
-  //       )
-  //     );
+  void _saveItem() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      Timestamp now = Timestamp.fromDate(DateTime.now());
+      setState(() {
+        _isSending = true;
+      });
 
-  //     final Map<String, dynamic> resData = json.decode(response.body);
+      final payment = Payment(
+        recipient: _enteredRecipient,
+        amount: _enteredAmount,
+        paymentMethodId: _selectedPaymentMethod,
+        categoryId: _selectedCategory,
+        date: now,
+      );
 
-  //     if (!mounted) { // i.e !context.mounted
-  //       return;
-  //     }
+      final newDocId = await _dataService.addPayment(payment);
 
-  //     Navigator.of(context).pop(
-  //       GroceryItem(
-  //         id: resData['name'], 
-  //         name: _enteredName, 
-  //         quantity: _enteredQuantity, 
-  //         category: _selectedCategory
-  //       )
-  //     );
-  //   } 
-  // }
+      if (!mounted) { // i.e !context.mounted
+        return;
+      }
+
+      Navigator.of(context).pop(
+        Payment(
+          id: newDocId, 
+          recipient: _enteredRecipient,
+          amount: _enteredAmount,
+          categoryId: _selectedCategory,
+          paymentMethodId: _selectedPaymentMethod,
+          date: now, 
+        )
+      );
+    } 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,118 +73,149 @@ class _NewPaymentState extends State<NewPayment> {
       appBar: AppBar(
         title: const Text('Add a new payment'),
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(12),
-        child: Text("HELLO TEXT NEW PAYMENT FORM"),
-        // child: Form(
-        //   key: _formKey,
-        //   child: Column(
-        //     children: [
-        //       TextFormField(
-        //         maxLength: 50,
-        //         decoration: const InputDecoration(
-        //           label: Text('Name')
-        //         ),
-        //         initialValue: _enteredName,
-        //         validator: (value) {
-        //           if (
-        //             value == null || 
-        //             value.isEmpty || 
-        //             value.trim().length <= 1 || 
-        //             value.trim().length > 50
-        //           ) {
-        //             return 'Must be between 1 and 50 characters.';
-        //           }
-        //           return null;
-        //         },
-        //         onSaved: (value) {
-        //           _enteredName = value!;
-        //         }
-        //       ), // instead of textfield!
-        //       Row(
-        //         crossAxisAlignment: CrossAxisAlignment.end,
-        //         children: [
-        //           Expanded(
-        //             child: TextFormField(
-        //               decoration: const InputDecoration(
-        //                 label: Text('Quantity')
-        //               ),
-        //               keyboardType: TextInputType.number,
-        //               initialValue: _enteredQuantity.toString(),
-        //               validator: (value) {
-        //                 if (
-        //                   value == null || 
-        //                   value.isEmpty || 
-        //                   int.tryParse(value) == null || 
-        //                   int.tryParse(value)! <= 0
-        //                 ) {
-        //                   return 'Must be a valid positive number.';
-        //                 }
-        //                 return null;
-        //               },
-        //               onSaved: (value) {
-        //                 _enteredQuantity = int.parse(value!);
-        //               },
-        //             ),
-        //           ),
-        //           const SizedBox(width: 8),
-        //           Expanded(
-        //             child: DropdownButtonFormField(
-        //               value: _selectedCategory,
-        //               items: [
-        //                 // can't loop through a map (categories), need to specify categories.entries
-        //                 for (final category in categories.entries) 
-        //                   DropdownMenuItem(
-        //                     value: category.value,
-        //                     child: Row(
-        //                       children: [
-        //                         Container(
-        //                           width: 16,
-        //                           height: 16,
-        //                           color: category.value.color
-        //                         ),
-        //                         const SizedBox(width: 6),
-        //                         Text(category.value.title)
-        //                       ]
-        //                     )
-        //                   )
-        //               ],
-        //               onChanged: (value) {
-        //                 // need to use setState here because to display the _selectedCategory in the UI, we need 
-        //                 // to keep track of a local state. This is also why we don't need onSaved on this dropdown
-        //                 setState(() {
-        //                   _selectedCategory = value!;
-        //                 });
-        //               },
-        //             ),
-        //           )
-        //         ],
-        //       ),
-        //       const SizedBox(height: 12),
-        //       Row(
-        //         mainAxisAlignment: MainAxisAlignment.end, // make sure row content is pushed all the way to the right
-        //         children: [
-        //           // setting TextButton's onPressed to null will disable the button
-        //           TextButton(
-        //             onPressed: _isSending ? null : () {
-        //               _formKey.currentState!.reset();
-        //             }, 
-        //             child: const Text('Reset')
-        //           ),
-        //           ElevatedButton(
-        //             onPressed: _isSending ? null : _saveItem, 
-        //             child: _isSending 
-        //               ? const SizedBox(
-        //                 height: 16, 
-        //                 width: 16, 
-        //                 child: CircularProgressIndicator()
-        //               ) : const Text('Add Item')
-        //           )
-        //         ],
-        //       )
-        //     ],
-        //   ),
-        // ),
+      body: Padding(
+        padding: const EdgeInsets.all(12),
+        // child: Text("HELLO TEXT NEW PAYMENT FORM"),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                maxLength: 50,
+                decoration: const InputDecoration(
+                  label: Text('Recipient')
+                ),
+                initialValue: _enteredRecipient,
+                validator: (value) {
+                  if (
+                    value == null || 
+                    value.isEmpty || 
+                    value.trim().length <= 1 || 
+                    value.trim().length > 50
+                  ) {
+                    return 'Must be between 1 and 50 characters.';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _enteredRecipient = value!;
+                }
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        label: Text('Amount')
+                      ),
+                      keyboardType: TextInputType.number,
+                      initialValue: _enteredAmount.toString(),
+                      validator: (value) {
+                        if (
+                          value == null || 
+                          value.isEmpty || 
+                          int.tryParse(value) == null || 
+                          int.tryParse(value)! <= 0
+                        ) {
+                          return 'Must be a valid positive number.';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _enteredAmount = int.parse(value!);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonFormField(
+                      decoration: const InputDecoration(
+                        label: Text('Category')
+                      ),
+                      value: _selectedCategory,
+                      items: [
+                        // can't loop through a map (categories), need to specify categories.entries
+                        for (final category in data["categories"]!) 
+                          DropdownMenuItem(
+                            value: category.id,
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 6),
+                                Text(category.name)
+                              ]
+                            )
+                          )
+                      ],
+                      onChanged: (value) {
+                        // need to use setState here because to display the _selectedCategory in the UI, we need 
+                        // to keep track of a local state. This is also why we don't need onSaved on this dropdown
+                        setState(() {
+                          _selectedCategory = value!;
+                        });
+                      },
+                    ),
+                  )
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField(
+                      decoration: const InputDecoration(
+                        label: Text('Payment Method')
+                      ),
+                      value: _selectedPaymentMethod,
+                      items: [
+                        // can't loop through a map (categories), need to specify categories.entries
+                        for (final method in data["paymentMethods"]!) 
+                          DropdownMenuItem(
+                            value: method.id,
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 6),
+                                Text(method.name)
+                              ]
+                            )
+                          )
+                      ],
+                      onChanged: (value) {
+                        // need to use setState here because to display the _selectedCategory in the UI, we need 
+                        // to keep track of a local state. This is also why we don't need onSaved on this dropdown
+                        setState(() {
+                          _selectedPaymentMethod = value!;
+                        });
+                      },
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end, // make sure row content is pushed all the way to the right
+                children: [
+                  // setting TextButton's onPressed to null will disable the button
+                  TextButton(
+                    onPressed: _isSending ? null : () {
+                      _formKey.currentState!.reset();
+                    }, 
+                    child: const Text('Reset')
+                  ),
+                  ElevatedButton(
+                    onPressed: _isSending ? null : _saveItem, 
+                    child: _isSending 
+                      ? const SizedBox(
+                        height: 16, 
+                        width: 16, 
+                        child: CircularProgressIndicator()
+                      ) : const Text('Add Item')
+                  )
+                ],
+              )
+            ],
+          )
+        )
       )
     );
   }

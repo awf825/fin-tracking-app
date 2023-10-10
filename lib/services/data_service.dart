@@ -110,4 +110,21 @@ class DataService {
     return out;
   } 
 
+  Future<String?> addPayment(Payment payment) async {
+    try {
+      final docRef = _db
+        .collection("payment")
+        .withConverter(
+          fromFirestore: Payment.fromFirestore,
+          toFirestore: (payment, options) => payment.toFirestore(),
+        )
+        .doc();
+      await docRef.set(payment);
+      return docRef.id;
+    } catch (e) {
+      print("<!!! -- Error writing payment doc: $e -- !!!>");
+      return null;
+    }
+  }
+
 }

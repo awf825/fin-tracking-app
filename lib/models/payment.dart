@@ -37,4 +37,29 @@ class Payment extends AppModel {
   String readDate() {
     return DateFormat.yMMMd().add_jm().format(date.toDate());
   }
+
+  factory Payment.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
+    return Payment(
+      recipient: data?['recipient'],
+      amount: data?['amount'],
+      paymentMethodId: data?['paymentMethodId'],
+      categoryId: data?['categoryId'],
+      date: data?['date'],
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      "recipient": recipient,
+      if (amount > 0) "amount": amount,
+      "paymentMethodId": paymentMethodId,
+      "categoryId": categoryId,
+      "date": date
+    };
+  }
+
 }
