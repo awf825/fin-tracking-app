@@ -13,7 +13,9 @@ class FullDataNotifier extends StateNotifier<Map<String, List<dynamic>>> {
   }
 
   void addPayment(Payment payment) {
-    state["payments"]?.add(payment);
+    var newState = state;
+    newState["payments"]!.add(payment);
+    state = newState;
   }
 }
 
