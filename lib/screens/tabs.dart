@@ -58,8 +58,8 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
 
     switch(_selectedPageIndex) {
       case 0: {
-        activePage = PaymentsScreen(
-          data: fullData["payments"] as List<Payment>?
+        activePage = const PaymentsScreen(
+          // data: fullData["payments"] as List<Payment>?
         );
         activePageTitle = 'Payments';
       }
@@ -85,8 +85,8 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
       }
       break;
       default: {
-        activePage = PaymentsScreen(
-          data: fullData["payments"] as List<Payment>?
+        activePage = const PaymentsScreen(
+          // data: fullData["payments"] as List<Payment>?
         );
         activePageTitle = 'Payments';
       }

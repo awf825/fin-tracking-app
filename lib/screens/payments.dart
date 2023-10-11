@@ -4,32 +4,9 @@ import 'package:payment_tracking/models/payment.dart';
 import 'package:payment_tracking/providers/full_data_provider.dart';
 import 'package:payment_tracking/widgets/new_payment.dart';
 
-class PaymentsScreen extends ConsumerStatefulWidget {
-  PaymentsScreen({
-    super.key,
-    this.data
-  });
+class PaymentsScreen extends ConsumerWidget {
+  const PaymentsScreen({super.key});
 
-  List<Payment> ?data;
-
-  @override
-  ConsumerState<PaymentsScreen> createState() {
-    return PaymentsScreenState();
-  }
-}
-
-class PaymentsScreenState extends ConsumerState<PaymentsScreen> {
-  // ignore: prefer_final_fields
-  List<dynamic>? _payments;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.data!.isNotEmpty) {
-      _payments = widget.data;
-    }
-  }
-  
   List<DataColumn> getDataColumns(columnNames) {
     List<DataColumn> columns = [];
     for (var name in columnNames) {
@@ -49,10 +26,14 @@ class PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     }
     return columns;
   }
-
+  
   @override
-  Widget build(BuildContext context) {
-    //List<dynamic>? _payments = widget.data;
+  Widget build(BuildContext context, WidgetRef ref) {
+    Map<String, List<dynamic>> fullData = ref.watch(fullDataProvider);
+
+    print("<!-- payments on widget rebuild -->");
+    print(fullData["payments"]);
+    print("<!---->");
 
     void addItem() async {
       final newPayment = await Navigator.of(context).push<Payment>(
@@ -61,20 +42,20 @@ class PaymentsScreenState extends ConsumerState<PaymentsScreen> {
         )
       );
 
-      print("<!-- newPament @ addItem -->");
-      print(newPayment);
-
       if (newPayment == null) {
         return; 
       }
 
+      final gotCategory = ref.read(fullDataProvider.notifier).getCategoryById(newPayment.categoryId);
+      final gotPaymentMethod = ref.read(fullDataProvider.notifier).getPaymentMethodById(newPayment.paymentMethodId);
+      newPayment.setCategory(gotCategory);
+      newPayment.setPaymentMethod(gotPaymentMethod);
+
+      print("<!-- newPayment after Update -->");
+      print(newPayment);
+      print("<!---->");
+
       ref.read(fullDataProvider.notifier).addPayment(newPayment);
-
-      //_payments!.add(newPayment);
-
-      setState(() {
-        _payments = [...?_payments, newPayment];
-      });
     }
 
     return Scaffold(
@@ -92,10 +73,9 @@ class PaymentsScreenState extends ConsumerState<PaymentsScreen> {
               "Category",
               "Method"
             ]),
-            //rows: getDataTable(fullData["payments"]),
             rows: <DataRow> [
-              if (_payments != null) 
-                for (final payment in _payments!)
+              if (fullData.entries.isNotEmpty) 
+                for (final payment in fullData["payments"]!)
                     DataRow(
                       cells: <DataCell>[
                         DataCell(
@@ -127,7 +107,7 @@ class PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                         ),
                         DataCell(
                           Text(
-                            payment.category!.name,
+                            payment.category.name,
                             style: const TextStyle(
                               color: Colors.red,
                               fontStyle: FontStyle.italic
@@ -136,7 +116,7 @@ class PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                         ),
                         DataCell(
                           Text(
-                            payment.paymentMethod!.name,
+                            payment.paymentMethod.name,
                             style: const TextStyle(
                               color: Colors.red,
                               fontStyle: FontStyle.italic
