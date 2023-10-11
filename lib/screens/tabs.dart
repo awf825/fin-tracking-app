@@ -9,6 +9,7 @@ import 'package:payment_tracking/services/data_service.dart';
 import 'package:payment_tracking/screens/categories.dart';
 
 import 'package:payment_tracking/providers/full_data_provider.dart';
+import 'package:payment_tracking/widgets/new_payment.dart';
 
 import '../models/payment.dart';
 import '../models/category.dart';
@@ -50,18 +51,52 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     });
   }
 
+  void addPayment() async {
+    final newPayment = await Navigator.of(context).push<Payment>(
+      MaterialPageRoute(
+        builder: (ctx) => const NewPayment(),
+      )
+    );
+
+    if (newPayment == null) {
+      return; 
+    }
+
+    final gotCategory = ref.read(fullDataProvider.notifier).getCategoryById(newPayment.categoryId);
+    final gotPaymentMethod = ref.read(fullDataProvider.notifier).getPaymentMethodById(newPayment.paymentMethodId);
+    newPayment.setCategory(gotCategory);
+    newPayment.setPaymentMethod(gotPaymentMethod);
+
+    print("<!-- newPayment after Update -->");
+    print(newPayment);
+    print("<!---->");
+
+    ref.read(fullDataProvider.notifier).addPayment(newPayment);
+  }
+
   @override 
   Widget build(BuildContext context) {
     final fullData = ref.watch(fullDataProvider);
     Widget activePage;
     String activePageTitle;
+    void Function()? activeAddFunction;
+
+    print("<!-- fullData payments AT TABS  -->");
+    print(fullData["payments"]!.length);
+    print("<!---->");
 
     switch(_selectedPageIndex) {
       case 0: {
-        activePage = const PaymentsScreen(
-          // data: fullData["payments"] as List<Payment>?
-        );
-        activePageTitle = 'Payments';
+        if (fullData["payments"] != null) {
+          activePage = PaymentsScreen(
+            data: fullData["payments"] as List<Payment>
+          );
+          activePageTitle = 'Payments';
+          activeAddFunction = addPayment;
+        } else {
+          activePage = const Text("LOADING SCREEN");
+          activePageTitle = 'Loading';
+        }
       }
       break;
       case 1: {
@@ -85,10 +120,16 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
       }
       break;
       default: {
-        activePage = const PaymentsScreen(
-          // data: fullData["payments"] as List<Payment>?
-        );
-        activePageTitle = 'Payments';
+        if (fullData["payments"] != null) {
+          activePage = PaymentsScreen(
+            data: fullData["payments"] as List<Payment>
+          );
+          activePageTitle = 'Payments';
+          activeAddFunction = addPayment;
+        } else {
+          activePage = const Text("LOADING SCREEN");
+          activePageTitle = 'Loading';
+        }
       }
       break;
     }
@@ -96,6 +137,10 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(activePageTitle),
+        leading: IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: activeAddFunction,
+        ),
       ),
       // drawer: MainDrawer(
       //   onSelectScreen: _setScreen,
