@@ -1,63 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:pagination_view/pagination_view.dart';
 import 'package:payment_tracking/models/payment.dart';
-import 'package:payment_tracking/providers/full_data_provider.dart';
+import 'package:payment_tracking/providers/category_provider.dart';
+import 'package:payment_tracking/providers/payment_method_provider.dart';
+import 'package:payment_tracking/providers/payment_provider.dart';
 import 'package:payment_tracking/widgets/new_payment.dart';
 
+// ignore: must_be_immutable
 class PaymentsScreen extends ConsumerStatefulWidget {
-  PaymentsScreen({
-    super.key,
-    required this.data
-  });
-
-  List<Payment> data;
+  const PaymentsScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _PaymentsScreenState createState() => _PaymentsScreenState();
 }
 
 class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
-  static const _pageSize = 20;
-
-  final PagingController<int, Payment> _pagingController = PagingController(firstPageKey: 0);
+  List<Payment> _localPayments = [];
   
   @override
   void initState() {
-    _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
-    });
-    print("<!-- initDState  -->");
-
     super.initState();
   }
 
-  Future<void> _fetchPage(int pageKey) async {
-    print("<!-- _fetchPage  -->");
-    try {
-      Map<String, List<dynamic>> fullData = await ref.read(fullDataProvider);
-      print("<!-- fullData  -->");
-      print(fullData);
-      print("<!---->");
-      final payments = fullData["payments"] as List<Payment>;
-      final newItems = payments.length < _pageSize ? 
-        payments.sublist(pageKey, payments.length) : 
-        payments.sublist(pageKey, _pageSize);
-      final isLastPage = newItems.length < _pageSize;
-      if (isLastPage) {
-        _pagingController.appendLastPage(newItems);
-      } else {
-        final nextPageKey = pageKey + newItems.length;
-        _pagingController.appendPage(newItems, nextPageKey);
-      }
-    } catch (error) {
-      print(error);
-      _pagingController.error = error;
-    }
-  }
-
-  void addItem() async {
+  void addPayment() async {
     final newPayment = await Navigator.of(context).push<Payment>(
       MaterialPageRoute(
         builder: (ctx) => const NewPayment(),
@@ -68,40 +34,52 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
       return; 
     }
 
-    final gotCategory = ref.read(fullDataProvider.notifier).getCategoryById(newPayment.categoryId);
-    final gotPaymentMethod = ref.read(fullDataProvider.notifier).getPaymentMethodById(newPayment.paymentMethodId);
+    final gotCategory = ref.read(categoryProvider.notifier).getById(newPayment.categoryId);
+    final gotPaymentMethod = ref.read(paymentMethodProvider.notifier).getById(newPayment.paymentMethodId);
     newPayment.setCategory(gotCategory);
     newPayment.setPaymentMethod(gotPaymentMethod);
-
-    print("<!-- newPayment after Update -->");
-    print(newPayment);
-    print("<!---->");
-
-    ref.read(fullDataProvider.notifier).addPayment(newPayment);
+    ref.read(paymentProvider.notifier).addPayment(newPayment);
   }
 
   @override
   Widget build(BuildContext context) {
+    _localPayments = ref.watch(paymentProvider);
       // Don't worry about displaying progress or error indicators on screen; the 
       // package takes care of that. If you want to customize them, use the 
       // [PagedChildBuilderDelegate] properties.
-    return PagedListView<int, Payment>(
-      pagingController: _pagingController,
-      builderDelegate: PagedChildBuilderDelegate<Payment>(
-        itemBuilder: (context, item, index) => ListTile(
-          leading: Text(item.paymentMethod!.name),
-          title: Text(item.recipient),
-          subtitle: Text(item.category!.name),
-          trailing: Text(item.amount.toString())
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Payments'),
+        leading: IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: addPayment,
         ),
       ),
+      body: CustomScrollView(
+        slivers: <Widget>[
+          // const SliverAppBar(
+          //   pinned: true,
+          //   expandedHeight: 250.0,
+          //   flexibleSpace: FlexibleSpaceBar(
+          //     title: Text('Demo'),
+          //   ),
+          // ),
+          SliverFixedExtentList(
+            itemExtent: 50.0,
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return ListTile(
+                  leading: Text(_localPayments[index].paymentMethod!.name),
+                  title: Text(_localPayments[index].recipient),
+                  subtitle: Text(_localPayments[index].category!.name),
+                  trailing: Text(_localPayments[index].amount.toString())
+                );
+              },
+              childCount: _localPayments.length
+            ),
+          ),
+        ],
+      )
     );
   }
-
-  @override
-  void dispose() {
-    _pagingController.dispose();
-    super.dispose();
-  }
-
 }

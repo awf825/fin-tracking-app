@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_tracking/models/income_stream.dart';
 import 'package:payment_tracking/models/payment_method.dart';
+import 'package:payment_tracking/providers/category_provider.dart';
+import 'package:payment_tracking/providers/payment_method_provider.dart';
+import 'package:payment_tracking/providers/payment_provider.dart';
 import 'package:payment_tracking/screens/payment_methods.dart';
 import 'package:payment_tracking/screens/payments.dart';
 import 'package:payment_tracking/screens/streams.dart';
 import 'package:payment_tracking/services/data_service.dart';
 import 'package:payment_tracking/screens/categories.dart';
-
-import 'package:payment_tracking/providers/full_data_provider.dart';
-import 'package:payment_tracking/widgets/new_payment.dart';
-
 import '../models/payment.dart';
 import '../models/category.dart';
 
@@ -37,11 +36,19 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
   }
 
   Future<void> _loadItems() async {
-    final fullData = ref.watch(fullDataProvider);
+    final payments = ref.read(paymentProvider);
 
-    if (fullData.entries.isEmpty) {
+    if (payments.isEmpty) {
       Map<String, List<dynamic>> allData = await _dataService.loadAll();
-      ref.read(fullDataProvider.notifier).setData(allData);
+      List<Payment> payments = allData["payments"] as List<Payment>;
+      List<Category> categories = allData["categories"] as List<Category>;
+      List<PaymentMethod> paymentMethods = allData["paymentMethods"] as List<PaymentMethod>;
+      // List<Stream> streams = allData["streams"] as List<Stream>;
+
+      ref.read(paymentProvider.notifier).setData(payments);
+      ref.read(categoryProvider.notifier).setData(categories);
+      ref.read(paymentMethodProvider.notifier).setData(paymentMethods);
+      //ref.read(incomeStreamProvider.notifier).setData(streams);
     }
   }
   
@@ -51,96 +58,39 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     });
   }
 
-  void addPayment() async {
-    final newPayment = await Navigator.of(context).push<Payment>(
-      MaterialPageRoute(
-        builder: (ctx) => const NewPayment(),
-      )
-    );
-
-    if (newPayment == null) {
-      return; 
-    }
-
-    final gotCategory = ref.read(fullDataProvider.notifier).getCategoryById(newPayment.categoryId);
-    final gotPaymentMethod = ref.read(fullDataProvider.notifier).getPaymentMethodById(newPayment.paymentMethodId);
-    newPayment.setCategory(gotCategory);
-    newPayment.setPaymentMethod(gotPaymentMethod);
-
-    print("<!-- newPayment after Update -->");
-    print(newPayment);
-    print("<!---->");
-
-    ref.read(fullDataProvider.notifier).addPayment(newPayment);
-  }
-
   @override 
   Widget build(BuildContext context) {
-    final fullData = ref.watch(fullDataProvider);
     Widget activePage;
-    String activePageTitle;
-    void Function()? activeAddFunction;
-
-    print("<!-- fullData payments AT TABS  -->");
-    print(fullData["payments"]!.length);
-    print("<!---->");
 
     switch(_selectedPageIndex) {
       case 0: {
-        if (fullData["payments"] != null) {
-          activePage = PaymentsScreen(
-            data: fullData["payments"] as List<Payment>
-          );
-          activePageTitle = 'Payments';
-          activeAddFunction = addPayment;
-        } else {
-          activePage = const Text("LOADING SCREEN");
-          activePageTitle = 'Loading';
-        }
+        activePage = PaymentsScreen();
       }
       break;
       case 1: {
-        activePage = CategoriesScreen(
-          data: fullData["categories"] as List<Category>?
-        );
-        activePageTitle = 'Categories';
+        activePage = CategoriesScreen();
       }
       break;
       case 2: {
-        activePage = StreamsScreen(
-          data: fullData["streams"] as List<IncomeStream>?
-        );
-        activePageTitle = 'Income Streams';
+        activePage = StreamsScreen();
       }
       case 3: {
-        activePage = PaymentMethodsScreen(
-          data: fullData["paymentMethods"] as List<PaymentMethod>?
-        );
-        activePageTitle = 'Payment Methods';
+        activePage = PaymentMethodsScreen();
       }
       break;
       default: {
-        if (fullData["payments"] != null) {
-          activePage = PaymentsScreen(
-            data: fullData["payments"] as List<Payment>
-          );
-          activePageTitle = 'Payments';
-          activeAddFunction = addPayment;
-        } else {
-          activePage = const Text("LOADING SCREEN");
-          activePageTitle = 'Loading';
-        }
+        activePage = PaymentsScreen();
       }
       break;
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(activePageTitle),
-        leading: IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: activeAddFunction,
-        ),
+        title: const Text("ITS THE MAIN HEADER"),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.add),
+        //   onPressed: activeAddFunction,
+        // ),
       ),
       // drawer: MainDrawer(
       //   onSelectScreen: _setScreen,

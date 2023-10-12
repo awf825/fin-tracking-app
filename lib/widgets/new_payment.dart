@@ -10,7 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:payment_tracking/models/category.dart';
 import 'package:payment_tracking/models/payment.dart';
-import 'package:payment_tracking/providers/full_data_provider.dart';
+import 'package:payment_tracking/models/payment_method.dart';
+import 'package:payment_tracking/providers/category_provider.dart';
+import 'package:payment_tracking/providers/payment_method_provider.dart';
 import 'package:payment_tracking/services/data_service.dart';
 
 class NewPayment extends ConsumerStatefulWidget {
@@ -24,7 +26,6 @@ class NewPayment extends ConsumerStatefulWidget {
 
 class _NewPaymentState extends ConsumerState<NewPayment> {
   final _formKey = GlobalKey<FormState>();
-  late final data = ref.watch(fullDataProvider);
   final _dataService = DataService();
   var _enteredRecipient = '';
   var _enteredAmount = 0;  
@@ -69,6 +70,8 @@ class _NewPaymentState extends ConsumerState<NewPayment> {
 
   @override
   Widget build(BuildContext context) {
+    final categories = ref.read(categoryProvider);
+    final paymentMethods = ref.read(paymentMethodProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add a new payment'),
@@ -136,7 +139,7 @@ class _NewPaymentState extends ConsumerState<NewPayment> {
                       value: _selectedCategory,
                       items: [
                         // can't loop through a map (categories), need to specify categories.entries
-                        for (final category in data["categories"]!) 
+                        for (final category in categories) 
                           DropdownMenuItem(
                             value: category.id,
                             child: Row(
@@ -169,7 +172,7 @@ class _NewPaymentState extends ConsumerState<NewPayment> {
                       value: _selectedPaymentMethod,
                       items: [
                         // can't loop through a map (categories), need to specify categories.entries
-                        for (final method in data["paymentMethods"]!) 
+                        for (final method in paymentMethods) 
                           DropdownMenuItem(
                             value: method.id,
                             child: Row(
