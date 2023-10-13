@@ -64,22 +64,22 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
 
     switch(_selectedPageIndex) {
       case 0: {
-        activePage = PaymentsScreen();
+        activePage = const PaymentsScreen();
       }
       break;
       case 1: {
-        activePage = CategoriesScreen();
+        activePage = const CategoriesScreen();
       }
       break;
       case 2: {
-        activePage = StreamsScreen();
+        activePage = const StreamsScreen();
       }
       case 3: {
-        activePage = PaymentMethodsScreen();
+        activePage = const PaymentMethodsScreen();
       }
       break;
       default: {
-        activePage = PaymentsScreen();
+        activePage = const PaymentsScreen();
       }
       break;
     }

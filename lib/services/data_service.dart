@@ -127,4 +127,38 @@ class DataService {
     }
   }
 
+  Future<String?> addCategory(Category category) async {
+    try {
+      final docRef = _db
+        .collection("category")
+        .withConverter(
+          fromFirestore: Category.fromFirestore,
+          toFirestore: (payment, options) => category.toFirestore(),
+        )
+        .doc();
+      await docRef.set(category);
+      return docRef.id;
+    } catch (e) {
+      print("<!!! -- Error writing category doc: $e -- !!!>");
+      return null;
+    }
+  }
+
+  Future<String?> addPaymentMethod(PaymentMethod paymentMethod) async {
+    try {
+      final docRef = _db
+        .collection("paymentMethod")
+        .withConverter(
+          fromFirestore: PaymentMethod.fromFirestore,
+          toFirestore: (paymentMethod, options) => paymentMethod.toFirestore(),
+        )
+        .doc();
+      await docRef.set(paymentMethod);
+      return docRef.id;
+    } catch (e) {
+      print("<!!! -- Error writing paymentMethod doc: $e -- !!!>");
+      return null;
+    }
+  }
+
 }
