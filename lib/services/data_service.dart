@@ -127,6 +127,15 @@ class DataService {
     }
   }
 
+  Future updatePayment(Payment payment) async {
+    await _db.collection('payment').doc(payment.id).update({
+      "paymentMethodId": payment.paymentMethodId,
+      "categoryId": payment.categoryId,
+      "recipient": payment.recipient,
+      "amount": payment.amount
+    });
+  }
+
   Future<String?> addCategory(Category category) async {
     try {
       final docRef = _db

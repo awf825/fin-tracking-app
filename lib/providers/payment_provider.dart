@@ -18,11 +18,12 @@ class PaymentNotifier extends StateNotifier<List<Payment>> {
     state = [...state, payment];
   }
 
-  // PaymentMethod getPaymentMethodById(String id) {
-  //   int methodIndex = state["paymentMethods"]!.indexWhere((p) => p.id == id);
-  //   return state["paymentMethods"]![methodIndex];
-  // }
-  
+  void updatePayment(Payment payment) {
+    int idxToUpdate = state.indexWhere((element) => element.id == payment.id);
+    var newState = state;
+    newState[idxToUpdate] = payment;
+    state = [...newState];
+  }  
 }
 
 final paymentProvider = StateNotifierProvider<PaymentNotifier, List<Payment>>(

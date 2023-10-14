@@ -20,11 +20,11 @@ class Payment extends AppModel {
   final String ?id;
   PaymentMethod ?paymentMethod;
   Category ?category;
-  final dynamic amount;
+  dynamic amount;
   final Timestamp date;
-  final String recipient;
-  final String categoryId;
-  final String paymentMethodId;
+  String recipient;
+  String categoryId;
+  String paymentMethodId;
 
   void setPaymentMethod(paymentMethodToSet) {
     paymentMethod = paymentMethodToSet;
@@ -36,6 +36,10 @@ class Payment extends AppModel {
 
   String readDate() {
     return DateFormat.yMMMd().add_jm().format(date.toDate());
+  }
+
+  String readAmount() {
+    return '\$$amount';
   }
 
   factory Payment.fromFirestore(

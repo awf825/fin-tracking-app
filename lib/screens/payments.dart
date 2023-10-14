@@ -4,6 +4,7 @@ import 'package:payment_tracking/models/payment.dart';
 import 'package:payment_tracking/providers/category_provider.dart';
 import 'package:payment_tracking/providers/payment_method_provider.dart';
 import 'package:payment_tracking/providers/payment_provider.dart';
+import 'package:payment_tracking/widgets/edit_payment.dart';
 import 'package:payment_tracking/widgets/new_payment.dart';
 
 // ignore: must_be_immutable
@@ -16,8 +17,8 @@ class PaymentsScreen extends ConsumerStatefulWidget {
 }
 
 class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
-  List<Payment> _localPayments = [];
-  
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -41,12 +42,57 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     ref.read(paymentProvider.notifier).addPayment(newPayment);
   }
 
+  void editPayment(Payment payment) async {
+    final updatedPayment = await Navigator.of(context).push<Payment>(
+      MaterialPageRoute(
+        builder: (ctx) => EditPayment(
+          payment: payment
+        ),
+      )
+    );
+
+    if (updatedPayment == null) {
+      return; 
+    }
+
+    final gotCategory = ref.read(categoryProvider.notifier).getById(updatedPayment.categoryId);
+    final gotPaymentMethod = ref.read(paymentMethodProvider.notifier).getById(updatedPayment.paymentMethodId);
+    updatedPayment.setCategory(gotCategory);
+    updatedPayment.setPaymentMethod(gotPaymentMethod);
+    ref.read(paymentProvider.notifier).updatePayment(updatedPayment);
+  }
+
+  ExpansionTile _buildExpansionTile(Payment p) {
+    final GlobalKey expansionTileKey = GlobalKey();
+    // final Payment payment = _localPayments[index];
+    return ExpansionTile(
+      key: expansionTileKey,
+      title: ListTile(
+        leading: Text(p.paymentMethod!.name),
+        title: Text(p.recipient)
+      ),
+      
+      // Text('My expansion tile $index'),
+      children: <Widget>[
+        ListTile(
+          leading: IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () => editPayment(p),
+          ),
+          title: Text(p.category!.name),
+          subtitle: Text(p.readDate()),
+          trailing: Text(p.readAmount()),
+        )
+      ]
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    _localPayments = ref.watch(paymentProvider);
-      // Don't worry about displaying progress or error indicators on screen; the 
-      // package takes care of that. If you want to customize them, use the 
-      // [PagedChildBuilderDelegate] properties.
+    // ignore: no_leading_underscores_for_local_identifiers
+    List<Payment> _localPayments = ref.watch(paymentProvider);
+    _localPayments.sort((a,b) => b.date.compareTo(a.date));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Payments'),
@@ -55,31 +101,13 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
           onPressed: addPayment,
         ),
       ),
-      body: CustomScrollView(
-        slivers: <Widget>[
-          // const SliverAppBar(
-          //   pinned: true,
-          //   expandedHeight: 250.0,
-          //   flexibleSpace: FlexibleSpaceBar(
-          //     title: Text('Demo'),
-          //   ),
-          // ),
-          SliverFixedExtentList(
-            itemExtent: 50.0,
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return ListTile(
-                  leading: Text(_localPayments[index].paymentMethod!.name),
-                  title: Text(_localPayments[index].recipient),
-                  subtitle: Text(_localPayments[index].category!.name),
-                  trailing: Text(_localPayments[index].amount.toString())
-                );
-              },
-              childCount: _localPayments.length
-            ),
-          ),
-        ],
-      )
+      body: _localPayments.isNotEmpty ? 
+        ListView.builder(
+          controller: _scrollController,
+          itemCount: _localPayments.length,
+          itemBuilder: (BuildContext context, int index) => _buildExpansionTile(_localPayments[index]),
+        ) :
+        const Text('LOADING'),      
     );
   }
 }

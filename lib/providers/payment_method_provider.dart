@@ -1,6 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:payment_tracking/models/category.dart';
-import 'package:payment_tracking/models/payment.dart';
 import 'package:payment_tracking/models/payment_method.dart';
 
 class PaymentMethodNotifier extends StateNotifier<List<PaymentMethod>> {
