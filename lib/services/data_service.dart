@@ -178,9 +178,13 @@ class DataService {
   ) async {
     try {
       List<Payment> out = [];
+      // Timestamp startStamp = start.millisecondsSinceEpoch as Timestamp;
+      // Timestamp endStamp = end.millisecondsSinceEpoch as Timestamp;
       QuerySnapshot querySnapshot = await _db.collection('payment')
       .where("paymentMethodId", isEqualTo: paymentMethodId)
       .where("categoryId", isEqualTo: categoryId)
+      .where("date", isGreaterThanOrEqualTo: start)
+      .where("date", isLessThanOrEqualTo: end)
       .get();
 
       for (var doc in querySnapshot.docs) {

@@ -21,7 +21,7 @@ class _InsightsState extends ConsumerState<Insights> {
   final _dataService = DataService();
   var _selectedPaymentMethod;
   var _selectedCategory;
-  DateTime _selectedStartDate = DateTime.now();
+  DateTime _selectedStartDate = DateTime.now().subtract(const Duration(days: 7));
   DateTime _selectedEndDate = DateTime.now();
   var _isQuerying = false;
   var _queriedPayments = [];
@@ -67,7 +67,9 @@ class _InsightsState extends ConsumerState<Insights> {
       _selectedEndDate
     );
 
-    int totalSpend= queriedPayments.map((qp) => qp.amount).reduce((value, element) => value + element);
+    int totalSpend = queriedPayments.isNotEmpty ? 
+      queriedPayments.map((qp) => qp.amount).reduce((value, element) => value + element) :
+      0;
 
     setState(() {
       _queriedPayments = queriedPayments;
@@ -234,5 +236,4 @@ class _InsightsState extends ConsumerState<Insights> {
       )
     );
   }
-
 }
