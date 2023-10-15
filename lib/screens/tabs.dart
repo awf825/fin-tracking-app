@@ -10,6 +10,7 @@ import 'package:payment_tracking/screens/payments.dart';
 import 'package:payment_tracking/screens/streams.dart';
 import 'package:payment_tracking/services/data_service.dart';
 import 'package:payment_tracking/screens/categories.dart';
+import 'package:payment_tracking/widgets/insights.dart';
 import '../models/payment.dart';
 import '../models/category.dart';
 
@@ -58,6 +59,18 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     });
   }
 
+  void _goInsights() async {
+    final updatedPayment = await Navigator.of(context).push<Payment>(
+      MaterialPageRoute(
+        builder: (ctx) => Insights(),
+      )
+    );
+
+    if (updatedPayment == null) {
+      return; 
+    }
+  }
+
   @override 
   Widget build(BuildContext context) {
     Widget activePage;
@@ -71,10 +84,10 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
         activePage = const CategoriesScreen();
       }
       break;
+      // case 2: {
+      //   activePage = const StreamsScreen();
+      // }
       case 2: {
-        activePage = const StreamsScreen();
-      }
-      case 3: {
         activePage = const PaymentMethodsScreen();
       }
       break;
@@ -92,9 +105,35 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
         //   onPressed: activeAddFunction,
         // ),
       ),
-      // drawer: MainDrawer(
-      //   onSelectScreen: _setScreen,
-      // ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              curve: Curves.fastOutSlowIn,
+              child: Text(
+                'Drawer Header',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            const ListTile(
+              leading: Icon(Icons.attach_money),
+              title: Text('Goals')
+            ),
+            ListTile(
+              leading: const Icon(Icons.insights),
+              title: const Text('Insights'),
+              onTap: _goInsights,
+            ),
+          ],
+        ),
+      ),
 
       body: activePage,
       bottomNavigationBar: BottomNavigationBar(
@@ -104,8 +143,8 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.paid), label: "Payments"),
           BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
-          BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: "Income"),
-          BottomNavigationBarItem(icon: Icon(Icons.payment), label: "Payment Methods")          
+          // BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: "Income"),
+          BottomNavigationBarItem(icon: Icon(Icons.payment), label: "Accounts")          
         ],
       ),
     );

@@ -142,7 +142,7 @@ class DataService {
         .collection("category")
         .withConverter(
           fromFirestore: Category.fromFirestore,
-          toFirestore: (payment, options) => category.toFirestore(),
+          toFirestore: (category, options) => category.toFirestore(),
         )
         .doc();
       await docRef.set(category);
@@ -167,6 +167,42 @@ class DataService {
     } catch (e) {
       print("<!!! -- Error writing paymentMethod doc: $e -- !!!>");
       return null;
+    }
+  }
+
+  Future<List<Payment>> query(
+    String ?paymentMethodId,
+    String ?categoryId,
+    DateTime start,
+    DateTime end
+  ) async {
+    try {
+      List<Payment> out = [];
+      QuerySnapshot querySnapshot = await _db.collection('payment')
+      .where("paymentMethodId", isEqualTo: paymentMethodId)
+      .where("categoryId", isEqualTo: categoryId)
+      .get();
+
+      for (var doc in querySnapshot.docs) {
+        print('<!-- doc.id --!>');
+        print(doc.id);
+        final id = doc.id;
+        final data = doc.data() as Map;
+        Payment payment = Payment(
+          id: id,
+          date: data["date"], 
+          recipient: data["recipient"], 
+          amount: data["amount"], 
+          paymentMethodId: data["paymentMethodId"], 
+          categoryId: data["categoryId"]
+        );
+        out.add(payment);
+      }
+
+      return out;
+    } catch (e) {
+      print("<!!! -- Error querying: $e -- !!!>");
+      return [];
     }
   }
 
