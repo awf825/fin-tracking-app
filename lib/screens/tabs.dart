@@ -11,6 +11,7 @@ import 'package:payment_tracking/screens/streams.dart';
 import 'package:payment_tracking/services/data_service.dart';
 import 'package:payment_tracking/screens/categories.dart';
 import 'package:payment_tracking/widgets/insights.dart';
+import 'package:payment_tracking/widgets/integrations.dart';
 import '../models/payment.dart';
 import '../models/category.dart';
 
@@ -60,15 +61,19 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
   }
 
   void _goInsights() async {
-    final updatedPayment = await Navigator.of(context).push<Payment>(
+    await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (ctx) => Insights(),
+        builder: (ctx) => const Insights(),
       )
     );
+  }
 
-    if (updatedPayment == null) {
-      return; 
-    }
+  void _goIntegrations() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => const Integrations(),
+      )
+    );
   }
 
   @override 
@@ -130,6 +135,11 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
               leading: const Icon(Icons.insights),
               title: const Text('Insights'),
               onTap: _goInsights,
+            ),
+            ListTile(
+              leading: const Icon(Icons.sync),
+              title: const Text('Integrations'),
+              onTap: _goIntegrations,
             ),
           ],
         ),

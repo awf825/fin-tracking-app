@@ -742,6 +742,10 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - Plaid (4.4.0)
+  - plaid_flutter (0.0.1):
+    - Flutter
+    - Plaid (= 4.4.0)
   - PromisesObjC (2.3.1)
 
 DEPENDENCIES:
@@ -749,6 +753,7 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - plaid_flutter (from `.symlinks/plugins/plaid_flutter/ios`)
 
 SPEC REPOS:
   trunk:
@@ -763,6 +768,7 @@ SPEC REPOS:
     - gRPC-Core
     - leveldb-library
     - nanopb
+    - Plaid
     - PromisesObjC
 
 EXTERNAL SOURCES:
@@ -774,6 +780,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  plaid_flutter:
+    :path: ".symlinks/plugins/plaid_flutter/ios"
 
 SPEC CHECKSUMS:
   abseil: 926fb7a82dc6d2b8e1f2ed7f3a718bce691d1e46
@@ -791,6 +799,8 @@ SPEC CHECKSUMS:
   leveldb-library: f03246171cce0484482ec291f88b6d563699ee06
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  Plaid: 29a5506900d372d6d3d77199090b9a7a3af475bd
+  plaid_flutter: 25664c647a7a374249b44a397611d167cd0e7ade
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
 
 PODFILE CHECKSUM: c0a6a23e086e041c7b4593c482867a7139e5e317
