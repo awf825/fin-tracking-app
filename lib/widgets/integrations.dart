@@ -23,7 +23,7 @@ class _IntegrationsState extends ConsumerState<Integrations> {
   StreamSubscription<LinkExit>? _streamExit;
   StreamSubscription<LinkSuccess>? _streamSuccess;
   LinkObject? _successObject;
-  late String _linkToken;
+  String _linkToken = "";
 
   @override
   void initState() {
@@ -33,11 +33,9 @@ class _IntegrationsState extends ConsumerState<Integrations> {
     _streamExit = PlaidLink.onExit.listen(_onExit);
     _streamSuccess = PlaidLink.onSuccess.listen(_onSuccess);
 
-    // final x = await _getLinkToken();
     Future.delayed(Duration.zero, () {
       _getLinkToken();
     });
-    
   }
 
   @override
@@ -57,13 +55,7 @@ class _IntegrationsState extends ConsumerState<Integrations> {
       body: jsonEncode({}),
     );
     final decoded = jsonDecode(resp.body);
-    final String linkToken = decoded['link_token'];
-    if (linkToken.isNotEmpty) {
-      _linkToken = linkToken;
-    }
-  }
-
-  void _createLinkTokenConfiguration() {
+    _linkToken = decoded['link_token'];
     setState(() {
       _configuration = LinkTokenConfiguration(
         token: _linkToken,
@@ -77,6 +69,8 @@ class _IntegrationsState extends ConsumerState<Integrations> {
     print("onEvent: $name, metadata: $metadata");
   }
 
+  // called when integration is successful, and a public token is sent to client
+  // (to be exchanged for the creation of a user specific access token) 
   void _onSuccess(LinkSuccess event) {
     final token = event.publicToken;
     final metadata = event.metadata.description();
@@ -92,8 +86,10 @@ class _IntegrationsState extends ConsumerState<Integrations> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Integrations'),
+        ),
         body: Container(
           width: double.infinity,
           color: Colors.grey[200],
@@ -101,6 +97,7 @@ class _IntegrationsState extends ConsumerState<Integrations> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Expanded(
+                // TODO: insert integrations here instead of configuration string!!!
                 child: Center(
                   child: Text(
                     _configuration?.toJson().toString() ?? "",
@@ -110,27 +107,13 @@ class _IntegrationsState extends ConsumerState<Integrations> {
               ),
               SizedBox(height: 15),
               ElevatedButton(
-                onPressed: _createLinkTokenConfiguration,
-                child: Text("Create Link Token Configuration"),
-              ),
-              SizedBox(height: 15),
-              ElevatedButton(
                 onPressed: _configuration != null
                     ? () => PlaidLink.open(configuration: _configuration!)
                     : null,
-                child: Text("Open"),
-              ),
-              Expanded(
-                child: Center(
-                  child: Text(
-                    _successObject?.toJson().toString() ?? "",
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                child: Text("Create Integration"),
               ),
             ],
           ),
-        ),
       ),
     );
   }
