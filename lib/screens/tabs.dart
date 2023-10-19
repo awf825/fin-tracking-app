@@ -5,6 +5,9 @@ import 'package:payment_tracking/models/payment_method.dart';
 import 'package:payment_tracking/providers/category_provider.dart';
 import 'package:payment_tracking/providers/payment_method_provider.dart';
 import 'package:payment_tracking/providers/payment_provider.dart';
+import 'package:payment_tracking/providers/plaid/plaid_account_provider.dart';
+import 'package:payment_tracking/providers/plaid/plaid_item_provider.dart';
+import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
 import 'package:payment_tracking/screens/payment_methods.dart';
 import 'package:payment_tracking/screens/payments.dart';
 import 'package:payment_tracking/screens/streams.dart';
@@ -34,6 +37,9 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     super.initState();
     Future.delayed(Duration.zero, () {
       _loadItems();
+      _loadPlaidTransactions();
+      _loadPlaidAccounts();
+      _loadPlaidItems();
     });
   }
 
@@ -53,6 +59,22 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
       //ref.read(incomeStreamProvider.notifier).setData(streams);
     }
   }
+
+  Future<void> _loadPlaidTransactions() async {
+    Map<String, dynamic> all = await _dataService.loadAllTransactionsFromPlaid();
+    ref.read(plaidTransactionsProvider.notifier).setData(all);
+  }
+
+  Future<void> _loadPlaidAccounts() async {
+    Map<String, dynamic> all = await _dataService.loadAllAccountsFromPlaid();
+    ref.read(plaidAccountProvider.notifier).setData(all);
+  }
+
+  Future<void> _loadPlaidItems() async {
+    Map<String, dynamic> all = await _dataService.loadAllItemsFromPlaid();
+    ref.read(plaidItemProvider.notifier).setData(all);
+  }
+  
   
   void _selectPage(int index) {
     setState(() {
@@ -93,7 +115,7 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
       //   activePage = const StreamsScreen();
       // }
       case 2: {
-        activePage = const PaymentMethodsScreen();
+        activePage = const Integrations();
       }
       break;
       default: {
@@ -103,13 +125,13 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("ITS THE MAIN HEADER"),
-        // leading: IconButton(
-        //   icon: const Icon(Icons.add),
-        //   onPressed: activeAddFunction,
-        // ),
-      ),
+      // appBar: AppBar(
+      //   title: const Text("ITS THE MAIN HEADER"),
+      //   // leading: IconButton(
+      //   //   icon: const Icon(Icons.add),
+      //   //   onPressed: activeAddFunction,
+      //   // ),
+      // ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -151,10 +173,10 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedPageIndex,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.paid), label: "Payments"),
+          BottomNavigationBarItem(icon: Icon(Icons.paid), label: "Transactions"),
           BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
           // BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: "Income"),
-          BottomNavigationBarItem(icon: Icon(Icons.payment), label: "Accounts")          
+          BottomNavigationBarItem(icon: Icon(Icons.sync), label: "Integrations")          
         ],
       ),
     );

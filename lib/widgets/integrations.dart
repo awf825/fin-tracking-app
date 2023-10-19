@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:payment_tracking/providers/plaid/plaid_account_provider.dart';
+import 'package:payment_tracking/providers/plaid/plaid_item_provider.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 
 class Integrations extends ConsumerStatefulWidget {
@@ -18,6 +20,7 @@ class Integrations extends ConsumerStatefulWidget {
 }
 
 class _IntegrationsState extends ConsumerState<Integrations> {
+  final ScrollController _scrollController = ScrollController();
   LinkConfiguration? _configuration;
   StreamSubscription<LinkEvent>? _streamEvent;
   StreamSubscription<LinkExit>? _streamExit;
@@ -84,37 +87,68 @@ class _IntegrationsState extends ConsumerState<Integrations> {
     print("onExit metadata: $metadata, error: $error");
   }
 
+  ExpansionTile _buildExpansionTile(String title) {
+    return ExpansionTile(title: Text(title));
+    // final GlobalKey expansionTileKey = GlobalKey();
+    // print('<!-- p @ expansionTile -->');
+    // print(p["account_id"]);
+    // // final Payment payment = _localPayments[index];
+    // return ExpansionTile(
+    //   key: expansionTileKey,
+    //   title: ListTile(
+    //     leading: Image.network(p["personal_finance_category_icon_url"]),
+    //     title: Text(p["name"]),
+    //     trailing: Text(p["amount"].toString())
+    //   ),
+      
+    //   // Text('My expansion tile $index'),
+    //   children: <Widget>[
+    //     ListTile(
+    //       // leading: IconButton(
+    //       //   icon: const Icon(Icons.edit),
+    //       //   onPressed: () => editPayment(p),
+    //       // ),
+    //       leading: Text(p["date"]),
+    //       // title: Text(p["category"][0]),
+    //       title: Text(p["personal_finance_category"]["primary"]),
+    //       trailing: Text(p["payment_channel"]),
+    //     )
+    //   ]
+    // );
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<dynamic> ?accounts;
+    Map<String, dynamic> ?item;
+    Map<String, dynamic> ?institution;
+    Map<String, dynamic> plaidAccountJSON = ref.watch(plaidAccountProvider);
+    Map<String, dynamic> plaidItemJSON = ref.watch(plaidItemProvider);
+    accounts = plaidAccountJSON["accounts"];
+    item = plaidAccountJSON["item"];
+    institution = plaidItemJSON["institution"];
+    
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Integrations'),
+      appBar: AppBar(
+        title: const Text('Integrations'),
+        leading: ElevatedButton(
+          onPressed: _configuration != null
+              ? () => PlaidLink.open(configuration: _configuration!)
+              : null,
+          child: Text("Create Integration"),
         ),
-        body: Container(
-          width: double.infinity,
-          color: Colors.grey[200],
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                // TODO: insert integrations here instead of configuration string!!!
-                child: Center(
-                  child: Text(
-                    _configuration?.toJson().toString() ?? "",
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: _configuration != null
-                    ? () => PlaidLink.open(configuration: _configuration!)
-                    : null,
-                child: Text("Create Integration"),
-              ),
-            ],
-          ),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.add),
+        //   onPressed: addPayment,
+        // ),
       ),
+      body: accounts != null ? 
+        ListView.builder(
+          controller: _scrollController,
+          itemCount: 1,
+          itemBuilder: (BuildContext context, int index) => _buildExpansionTile(institution!["name"]),
+        ) :
+        const Text('LOADING'),      
     );
   }
 }

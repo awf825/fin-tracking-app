@@ -1,11 +1,44 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:payment_tracking/models/category.dart';
 import 'package:payment_tracking/models/income_stream.dart';
 import 'package:payment_tracking/models/payment.dart';
 import 'package:payment_tracking/models/payment_method.dart';
+import 'package:http/http.dart' as http;
 
 class DataService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  Future<Map<String, dynamic>> loadAllTransactionsFromPlaid() async {
+    final resp = await http.get(
+      Uri.parse('http://localhost:8000/api/transactions'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    return jsonDecode(resp.body);
+  }
+
+  Future<Map<String, dynamic>> loadAllAccountsFromPlaid() async {
+    final resp = await http.get(
+      Uri.parse('http://localhost:8000/api/accounts'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    return jsonDecode(resp.body);
+  }
+
+  Future<Map<String, dynamic>> loadAllItemsFromPlaid() async {
+    final resp = await http.get(
+      Uri.parse('http://localhost:8000/api/item'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    return jsonDecode(resp.body);
+  }
 
   Future<Map<String, List<dynamic>>> loadAll() async {
     try {
