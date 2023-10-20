@@ -4,6 +4,12 @@ import 'package:payment_tracking/models/payment.dart';
 import 'package:payment_tracking/providers/category_provider.dart';
 import 'package:payment_tracking/providers/payment_method_provider.dart';
 import 'package:payment_tracking/providers/payment_provider.dart';
+<<<<<<< HEAD
+=======
+import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
+import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
+import 'package:payment_tracking/services/auth_service.dart';
+>>>>>>> 13a5610 (adding google sign in with pretty button. adding logout function)
 import 'package:payment_tracking/widgets/edit_payment.dart';
 import 'package:payment_tracking/widgets/new_payment.dart';
 
@@ -18,6 +24,7 @@ class PaymentsScreen extends ConsumerStatefulWidget {
 
 class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
   final ScrollController _scrollController = ScrollController();
+  final _authService = AuthService();
 
   @override
   void initState() {
@@ -95,10 +102,10 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payments'),
-        leading: IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: addPayment,
+        title: const Text('Transactions'),
+          leading: IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: _authService.logOut,
         ),
       ),
       body: _localPayments.isNotEmpty ? 
