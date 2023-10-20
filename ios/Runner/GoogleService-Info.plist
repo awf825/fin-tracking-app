@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
+	<dict>
+	<key>CLIENT_ID</key>
+	<string>
+	558149320953-5su65ak0ur496ihfpg1vephflgthsoip.apps.googleusercontent.com
+	</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>
+	com.googleusercontent.apps.558149320953-5su65ak0ur496ihfpg1vephflgthsoip
+	</string>
 	<key>API_KEY</key>
 	<string>AIzaSyAbLHQRmMtXjFhVOJHY3p6sppLXtvvX7xI</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,16 +23,16 @@
 	<key>STORAGE_BUCKET</key>
 	<string>payment-tracking-app.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:558149320953:ios:d2bf7877fc99a93ae42228</string>
-</dict>
+	</dict>
 </plist>

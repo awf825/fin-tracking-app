@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:payment_tracking/models/category.dart';
 import 'package:payment_tracking/models/income_stream.dart';
@@ -241,6 +240,23 @@ class DataService {
       print("<!!! -- Error querying: $e -- !!!>");
       return [];
     }
+  }
+
+  void insertUser(user) async {
+    QuerySnapshot querySnapshot = await _db.collection('users')
+      .where("email", isEqualTo: user["email"])
+      .get();
+      
+    if (querySnapshot.docs.isEmpty) {
+      await _db
+        .collection("users")
+        .add(user)
+        .then(
+          (DocumentReference documentSnapshot) => print("<??? -- User Inserted: ${documentSnapshot.id} -- ???>"),
+          onError: (e) => print("<!!! -- Error completing: $e -- !!!>"),
+      );
+    }
+    return;
   }
 
 }

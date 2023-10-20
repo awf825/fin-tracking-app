@@ -11,6 +11,7 @@ import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dar
 import 'package:payment_tracking/screens/payment_methods.dart';
 import 'package:payment_tracking/screens/payments.dart';
 import 'package:payment_tracking/screens/streams.dart';
+import 'package:payment_tracking/services/auth_service.dart';
 import 'package:payment_tracking/services/data_service.dart';
 import 'package:payment_tracking/screens/categories.dart';
 import 'package:payment_tracking/widgets/insights.dart';
@@ -30,6 +31,7 @@ class TabsScreen extends ConsumerStatefulWidget {
 class _TabsScreenState extends ConsumerState<TabsScreen> {
   int _selectedPageIndex = 0;
   final _dataService = DataService();
+  final _authService = AuthService();
   // final fullData = ref.watch(fullDataProvider);
 
   @override
@@ -162,6 +164,11 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
               leading: const Icon(Icons.sync),
               title: const Text('Integrations'),
               onTap: _goIntegrations,
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: _authService.logOut,
             ),
           ],
         ),
