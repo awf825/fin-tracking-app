@@ -242,21 +242,33 @@ class DataService {
     }
   }
 
-  void insertUser(user) async {
-    QuerySnapshot querySnapshot = await _db.collection('users')
-      .where("email", isEqualTo: user["email"])
-      .get();
-      
-    if (querySnapshot.docs.isEmpty) {
-      await _db
-        .collection("users")
-        .add(user)
-        .then(
-          (DocumentReference documentSnapshot) => print("<??? -- User Inserted: ${documentSnapshot.id} -- ???>"),
-          onError: (e) => print("<!!! -- Error completing: $e -- !!!>"),
-      );
+  Future<dynamic> insertUser(user) async {
+    try {
+      QuerySnapshot querySnapshot = await _db.collection('users')
+        .where("email", isEqualTo: user["email"])
+        .get();
+
+      print('<!-- querySnapshot.docs[0] --!>');
+      print(querySnapshot.docs[0]);
+        
+      if (querySnapshot.docs.isEmpty) {
+        return await _db
+          .collection("users")
+          .add(user)
+          .then(
+            (DocumentReference documentSnapshot) => {
+                print("<??? -- User Inserted: ${documentSnapshot.id} -- ???>"),
+                documentSnapshot.id
+            },
+            onError: (e) => print("<!!! -- Error completing: $e -- !!!>"),
+        );
+      } else {
+        final doc = querySnapshot.docs[0];
+        return doc.id;
+      }
+    } catch (err) {
+      print("<!!! -- Error querying: $err -- !!!>");
     }
-    return;
   }
 
 }

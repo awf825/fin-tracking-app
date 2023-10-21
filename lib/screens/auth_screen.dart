@@ -60,7 +60,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _handleGoogleSignIn() async {
     final GoogleSignIn _googleSignIn = GoogleSignIn(
-      clientId: '',
+      clientId: '558149320953-5su65ak0ur496ihfpg1vephflgthsoip.apps.googleusercontent.com',
       scopes: [
         'email',
         'https://www.googleapis.com/auth/contacts.readonly',
@@ -68,9 +68,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
     try {
       GoogleSignInAccount? googleAccount = await _googleSignIn.signIn();
-
       _authService.signInWithGoogle(googleAccount);
-
     } catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
