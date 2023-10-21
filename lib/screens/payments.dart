@@ -58,6 +58,9 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     Map<String, dynamic> plaidJSON = ref.watch(plaidTransactionsProvider);
     transactions = plaidJSON["transactions"];
 
+        // print('<!--- institutions @ integrations ---!>');
+    // print(institutions[1]);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transactions'),

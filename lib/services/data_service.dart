@@ -5,13 +5,16 @@ import 'package:payment_tracking/models/income_stream.dart';
 import 'package:payment_tracking/models/payment.dart';
 import 'package:payment_tracking/models/payment_method.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DataService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<Map<String, dynamic>> loadAllTransactionsFromPlaid() async {
+  Future<Map<String, dynamic>> loadAllTransactionsFromPlaid(User? _currentUser) async {
     final resp = await http.get(
-      Uri.parse('http://localhost:8000/api/transactions'),
+      Uri.parse('http://localhost:8000/api/transactions').replace(queryParameters: {
+        'uid': _currentUser!.uid
+      }),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -19,9 +22,11 @@ class DataService {
     return jsonDecode(resp.body);
   }
 
-  Future<Map<String, dynamic>> loadAllAccountsFromPlaid() async {
+  Future<Map<String, dynamic>> loadAllAccountsFromPlaid(User? _currentUser) async {
     final resp = await http.get(
-      Uri.parse('http://localhost:8000/api/accounts'),
+      Uri.parse('http://localhost:8000/api/accounts').replace(queryParameters: {
+        'uid': _currentUser!.uid
+      }),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -29,9 +34,11 @@ class DataService {
     return jsonDecode(resp.body);
   }
 
-  Future<Map<String, dynamic>> loadAllItemsFromPlaid() async {
+  Future<Map<String, dynamic>> loadAllItemsFromPlaid(User? _currentUser) async {
     final resp = await http.get(
-      Uri.parse('http://localhost:8000/api/item'),
+      Uri.parse('http://localhost:8000/api/item').replace(queryParameters: {
+        'uid': _currentUser!.uid
+      }),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

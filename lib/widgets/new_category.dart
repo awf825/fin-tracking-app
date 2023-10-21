@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:payment_tracking/models/category.dart';
 import 'package:payment_tracking/services/data_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class NewCategory extends StatefulWidget {
   const NewCategory({

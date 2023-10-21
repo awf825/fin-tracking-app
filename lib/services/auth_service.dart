@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:payment_tracking/services/data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:payment_tracking/models/app_user.dart';

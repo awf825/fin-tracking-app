@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_tracking/models/income_stream.dart';
@@ -32,16 +33,18 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
   int _selectedPageIndex = 0;
   final _dataService = DataService();
   final _authService = AuthService();
+  User? _currentUser;
   // final fullData = ref.watch(fullDataProvider);
 
   @override
   void initState() {
     super.initState();
+    _currentUser = _authService.currentUser;
     Future.delayed(Duration.zero, () {
       _loadItems();
-      _loadPlaidTransactions();
-      _loadPlaidAccounts();
-      _loadPlaidItems();
+      _loadPlaidTransactions(_currentUser);
+      _loadPlaidAccounts(_currentUser);
+      _loadPlaidItems(_currentUser);
     });
   }
 
@@ -62,18 +65,19 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     }
   }
 
-  Future<void> _loadPlaidTransactions() async {
-    Map<String, dynamic> all = await _dataService.loadAllTransactionsFromPlaid();
+  Future<void> _loadPlaidTransactions(User? _currentUser) async {
+    Map<String, dynamic> all = await _dataService.loadAllTransactionsFromPlaid(_currentUser);
     ref.read(plaidTransactionsProvider.notifier).setData(all);
   }
 
-  Future<void> _loadPlaidAccounts() async {
-    Map<String, dynamic> all = await _dataService.loadAllAccountsFromPlaid();
+  Future<void> _loadPlaidAccounts(User? _currentUser) async {
+    Map<String, dynamic> all = await _dataService.loadAllAccountsFromPlaid(_currentUser);
     ref.read(plaidAccountProvider.notifier).setData(all);
   }
 
-  Future<void> _loadPlaidItems() async {
-    Map<String, dynamic> all = await _dataService.loadAllItemsFromPlaid();
+  Future<void> _loadPlaidItems(User? _currentUser) async {
+    Map<String, dynamic> all = await _dataService.loadAllItemsFromPlaid(_currentUser);
+    
     ref.read(plaidItemProvider.notifier).setData(all);
   }
   
