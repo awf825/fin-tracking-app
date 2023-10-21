@@ -4,12 +4,7 @@ import 'package:payment_tracking/models/payment.dart';
 import 'package:payment_tracking/providers/category_provider.dart';
 import 'package:payment_tracking/providers/payment_method_provider.dart';
 import 'package:payment_tracking/providers/payment_provider.dart';
-<<<<<<< HEAD
-=======
-import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
-import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
 import 'package:payment_tracking/services/auth_service.dart';
->>>>>>> 13a5610 (adding google sign in with pretty button. adding logout function)
 import 'package:payment_tracking/widgets/edit_payment.dart';
 import 'package:payment_tracking/widgets/new_payment.dart';
 
