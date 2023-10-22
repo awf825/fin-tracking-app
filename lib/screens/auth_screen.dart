@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:payment_tracking/services/auth_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:payment_tracking/services/data_service.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -17,7 +16,6 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   final _form = GlobalKey<FormState>();
   final _authService = AuthService();
-  final _dataService = DataService();
   var _isLogin = true;
   var _enteredEmail = '';
   var _enteredPassword = '';

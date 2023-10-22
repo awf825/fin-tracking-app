@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:payment_tracking/providers/plaid/plaid_account_provider.dart';
 import 'package:payment_tracking/providers/plaid/plaid_item_provider.dart';
+import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
 import 'package:payment_tracking/services/auth_service.dart';
+import 'package:payment_tracking/services/plaid_service.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -29,6 +31,7 @@ class _IntegrationsState extends ConsumerState<Integrations> {
   StreamSubscription<LinkSuccess>? _streamSuccess;
   User? _currentUser;
   final _authService = AuthService();
+  final _plaidService = PlaidService();
   String _linkToken = "";
 
   @override
@@ -98,13 +101,15 @@ class _IntegrationsState extends ConsumerState<Integrations> {
       }),
     );
     final decoded = jsonDecode(resp.body);
-    if (decoded["error"]) {
-      return;
-      // TODO, notify user if plaid doesn't
-    } else {
-      // add data to riverpod?
-    }
-    // setState(() => _successObject = event);
+    print('<!-- decoded json at success --!>');
+    print(decoded);
+
+    Map<String, dynamic> items = await _plaidService.loadAllItemsFromPlaid(_currentUser);
+    ref.read(plaidItemProvider.notifier).setData(items);
+    Map<String, dynamic> transactions = await _plaidService.loadAllTransactionsFromPlaid(_currentUser);
+    ref.read(plaidTransactionsProvider.notifier).setData(transactions);
+    Map<String, dynamic> accouts = await _plaidService.loadAllAccountsFromPlaid(_currentUser);
+    ref.read(plaidAccountProvider.notifier).setData(accouts);
   }
 
   void _onExit(LinkExit event) {

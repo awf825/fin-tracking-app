@@ -7,8 +7,6 @@ import 'package:payment_tracking/providers/payment_provider.dart';
 import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
 import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
 import 'package:payment_tracking/services/auth_service.dart';
-import 'package:payment_tracking/widgets/edit_payment.dart';
-import 'package:payment_tracking/widgets/new_payment.dart';
 
 // ignore: must_be_immutable
 class PaymentsScreen extends ConsumerStatefulWidget {

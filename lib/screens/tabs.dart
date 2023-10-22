@@ -1,24 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:payment_tracking/models/income_stream.dart';
-import 'package:payment_tracking/models/payment_method.dart';
-import 'package:payment_tracking/providers/category_provider.dart';
-import 'package:payment_tracking/providers/payment_method_provider.dart';
-import 'package:payment_tracking/providers/payment_provider.dart';
 import 'package:payment_tracking/providers/plaid/plaid_account_provider.dart';
 import 'package:payment_tracking/providers/plaid/plaid_item_provider.dart';
 import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
-import 'package:payment_tracking/screens/payment_methods.dart';
 import 'package:payment_tracking/screens/payments.dart';
-import 'package:payment_tracking/screens/streams.dart';
 import 'package:payment_tracking/services/auth_service.dart';
-import 'package:payment_tracking/services/data_service.dart';
-import 'package:payment_tracking/screens/categories.dart';
+import 'package:payment_tracking/services/plaid_service.dart';
 import 'package:payment_tracking/widgets/insights.dart';
 import 'package:payment_tracking/widgets/integrations.dart';
-import '../models/payment.dart';
-import '../models/category.dart';
 
 class TabsScreen extends ConsumerStatefulWidget {
   const TabsScreen({super.key});
@@ -31,7 +21,7 @@ class TabsScreen extends ConsumerStatefulWidget {
 
 class _TabsScreenState extends ConsumerState<TabsScreen> {
   int _selectedPageIndex = 0;
-  final _dataService = DataService();
+  final _dataService = PlaidService();
   final _authService = AuthService();
   User? _currentUser;
   // final fullData = ref.watch(fullDataProvider);
@@ -41,28 +31,10 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     super.initState();
     _currentUser = _authService.currentUser;
     Future.delayed(Duration.zero, () {
-      _loadItems();
       _loadPlaidTransactions(_currentUser);
       _loadPlaidAccounts(_currentUser);
       _loadPlaidItems(_currentUser);
     });
-  }
-
-  Future<void> _loadItems() async {
-    final payments = ref.read(paymentProvider);
-
-    if (payments.isEmpty) {
-      Map<String, List<dynamic>> allData = await _dataService.loadAll();
-      List<Payment> payments = allData["payments"] as List<Payment>;
-      List<Category> categories = allData["categories"] as List<Category>;
-      List<PaymentMethod> paymentMethods = allData["paymentMethods"] as List<PaymentMethod>;
-      // List<Stream> streams = allData["streams"] as List<Stream>;
-
-      ref.read(paymentProvider.notifier).setData(payments);
-      ref.read(categoryProvider.notifier).setData(categories);
-      ref.read(paymentMethodProvider.notifier).setData(paymentMethods);
-      //ref.read(incomeStreamProvider.notifier).setData(streams);
-    }
   }
 
   Future<void> _loadPlaidTransactions(User? _currentUser) async {
@@ -114,13 +86,6 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
       }
       break;
       case 1: {
-        activePage = const CategoriesScreen();
-      }
-      break;
-      // case 2: {
-      //   activePage = const StreamsScreen();
-      // }
-      case 2: {
         activePage = const Integrations();
       }
       break;
@@ -185,9 +150,7 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
         currentIndex: _selectedPageIndex,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.paid), label: "Transactions"),
-          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
-          // BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: "Income"),
-          BottomNavigationBarItem(icon: Icon(Icons.sync), label: "Integrations")          
+          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Integrations"),     
         ],
       ),
     );

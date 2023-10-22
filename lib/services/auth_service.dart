@@ -1,13 +1,11 @@
-import 'dart:convert';
-import 'package:payment_tracking/services/data_service.dart';
+import 'package:payment_tracking/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:payment_tracking/models/app_user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final _dataService = DataService();
+  final _firestoreService = FirestoreService();
 
   AppUser _userFromFirebaseUser(User? user) {
     // ignore: unnecessary_null_comparison
@@ -22,17 +20,6 @@ class AuthService {
 
   User? get currentUser {
     return _auth.currentUser;
-  }
-
-  void beginApiSession(String docId) async {
-      var response = await http.post(
-        Uri.parse('http://localhost:8000/api/begin_session'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "docId": docId
-        })
-      );
-      print(response);
   }
 
   Future<void> signUpWithEmail(email, password) async {
@@ -51,7 +38,7 @@ class AuthService {
         "_resources": {}
       };
 
-      _dataService.insertUser(user);
+      _firestoreService.insertUser(user);
     }
   }
 
@@ -82,8 +69,7 @@ class AuthService {
       "photoUrl": googleAccount.photoUrl,
     };
 
-    dynamic loggedInUserDocId = await _dataService.insertUser(googleUser);
-    beginApiSession(loggedInUserDocId as String);
+    dynamic loggedInUserDocId = await _firestoreService.insertUser(googleUser);
   }
 
 
