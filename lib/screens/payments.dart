@@ -99,8 +99,8 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
       appBar: AppBar(
         title: const Text('Transactions'),
           leading: IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: _authService.logOut,
+          icon: const Icon(Icons.add),
+          onPressed: addPayment,
         ),
       ),
       body: _localPayments.isNotEmpty ? 
