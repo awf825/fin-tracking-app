@@ -1,4 +1,4 @@
-import 'package:payment_tracking/services/data_service.dart';
+import 'package:payment_tracking/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:payment_tracking/models/app_user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -6,11 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _dataService = DataService();
-
-  AppUser _userFromFirebaseUser(User? user) {
-    // ignore: unnecessary_null_comparison
-    return AppUser(uid: user!.uid);
-  }
+  final _firestoreService = FirestoreService();
 
   Stream<AppUser> get user {
     return _auth
@@ -38,7 +34,7 @@ class AuthService {
         "_resources": {}
       };
 
-      _dataService.insertUser(user);
+      _firestoreService.insertUser(user);
     }
   }
 
@@ -69,7 +65,7 @@ class AuthService {
       "photoUrl": googleAccount.photoUrl,
     };
 
-    _dataService.insertUser(googleUser);
+    dynamic loggedInUserDocId = await _firestoreService.insertUser(googleUser);
   }
 
 

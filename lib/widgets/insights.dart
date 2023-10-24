@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_tracking/models/payment.dart';
 import 'package:payment_tracking/providers/category_provider.dart';
 import 'package:payment_tracking/providers/payment_method_provider.dart';
-import 'package:payment_tracking/services/data_service.dart';
+import 'package:payment_tracking/services/plaid_service.dart';
 
 class Insights extends ConsumerStatefulWidget {
   const Insights({
@@ -18,7 +18,7 @@ class Insights extends ConsumerStatefulWidget {
 }
 
 class _InsightsState extends ConsumerState<Insights> {
-  final _dataService = DataService();
+  final _dataService = PlaidService();
   var _selectedPaymentMethod;
   var _selectedCategory;
   DateTime _selectedStartDate = DateTime.now().subtract(const Duration(days: 7));
@@ -53,29 +53,6 @@ class _InsightsState extends ConsumerState<Insights> {
         _selectedEndDate = picked;
       });
     }
-  }
-
-  void _query() async {
-    setState(() {
-      _isQuerying = true;
-    });
-
-    List<Payment> queriedPayments = await _dataService.query(
-      _selectedPaymentMethod,
-      _selectedCategory,
-      _selectedStartDate,
-      _selectedEndDate
-    );
-
-    int totalSpend = queriedPayments.isNotEmpty ? 
-      queriedPayments.map((qp) => qp.amount).reduce((value, element) => value + element) :
-      0;
-
-    setState(() {
-      _queriedPayments = queriedPayments;
-      _totalSpend = totalSpend;
-      _isQuerying = false;
-    });
   }
 
   @override
@@ -184,15 +161,6 @@ class _InsightsState extends ConsumerState<Insights> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround, // make sure row content is pushed all the way to the right
                   children: [
                     Text('Spend: \$$_totalSpend'),
-                    ElevatedButton(
-                      onPressed: _isQuerying ? null : _query, 
-                      child: _isQuerying 
-                        ? const SizedBox(
-                          height: 16, 
-                          width: 16, 
-                          child: CircularProgressIndicator()
-                        ) : const Text('Search')
-                    )
                   ],
                 ),
                 Row(
