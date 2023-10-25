@@ -42,7 +42,7 @@ class App extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(), 
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return const TabsScreen();
+            return const PaymentsScreen();
           }
           return const AuthScreen();
         }
