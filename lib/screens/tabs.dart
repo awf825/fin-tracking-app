@@ -58,8 +58,6 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
 
   ExpansionTile _buildExpansionTile(Map<String, dynamic> p) {
     final GlobalKey expansionTileKey = GlobalKey();
-    print('<!-- p @ expansionTile -->');
-    print(p["account_id"]);
 
     return ExpansionTile(
       key: expansionTileKey,
@@ -83,33 +81,137 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
   @override
   Widget build(BuildContext context) {
     List<dynamic> ?transactions;
+    List<dynamic> ?accounts;
     Map<String, dynamic> plaidJSON = ref.watch(plaidTransactionsProvider);
+    Map<String, dynamic> plaidAccountJSON = ref.watch(plaidAccountProvider);
     transactions = plaidJSON["transactions"];
+    accounts = plaidAccountJSON["accounts"];
 
-        // print('<!--- institutions @ integrations ---!>');
-    // print(institutions[1]);
+    print('<!--- accounts ---!>');
+    print(accounts!.length);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transactions'),
-          // leading: IconButton(
-          //   icon: const Icon(Icons.logout),
-          //   onPressed: _authService.logOut,
-          // ),
           leading: IconButton(
-            icon: const Icon(Icons.push_pin),
-            onPressed: () {
-              Navigator.of(context).push(_createRoute());
-            },
-          )
+            icon: const Icon(Icons.logout),
+            onPressed: _authService.logOut,
+          ),
+          // leading: IconButton(
+          //   icon: const Icon(Icons.push_pin),
+          //   onPressed: () {
+          //     Navigator.of(context).push(_createRoute());
+          //   },
+          // )
       ),
-      body: transactions != null ? 
-        ListView.builder(
-          controller: _scrollController,
-          itemCount: transactions.length,
-          itemBuilder: (BuildContext context, int index) => _buildExpansionTile(transactions![index]),
-        ) :
-        const Text('LOADING'),      
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  height: 200.0,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: <Color>[
+                        Colors.red,
+                        Colors.blue
+                      ],
+                    ),
+                  ),
+                ),
+                const Positioned(
+                  top:0.0,
+                  left: 0.0,
+                  child: Padding(
+                    padding: EdgeInsets.all(18.0),
+                    child: Column(
+                      children: [
+                        Text('metric'),
+                        Text('another metric'),
+                        Text('metric'),
+                        Text('one more metric'),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top:0.0,
+                  right: 0.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: IconButton(
+                      icon: const Icon(Icons.menu, color: Colors.white,),
+                      onPressed: () {}),
+                  ),
+                )
+              ]
+            ),
+            SizedBox(
+              height: 40.0,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: ListView(
+                  // This next line does the trick.
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    ElevatedButton(
+                      child: Text(
+                        "All Accounts".toUpperCase(),
+                        style: TextStyle(fontSize: 14)
+                      ),
+                      style: ButtonStyle(
+                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                        backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                            side: BorderSide(color: Colors.red)
+                          )
+                        )
+                      ),
+                      onPressed: () => {}
+                    ),
+                    const SizedBox(width: 5),
+                    for (var account in accounts)
+                      ElevatedButton(
+                        style: ButtonStyle(
+                          foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                          backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: Colors.red)
+                            )
+                          )
+                        ),
+                        onPressed: () => {},
+                        child: Text(
+                          account?["name"].toUpperCase(),
+                          style: TextStyle(fontSize: 14)
+                        )
+                      ),
+                      // const SizedBox(width: 5)
+
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 5),
+            transactions != null ? 
+            ListView.builder(
+              controller: _scrollController,
+              // scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: transactions.length,
+              itemBuilder: (BuildContext context, int index) => _buildExpansionTile(transactions![index]),
+            ) :
+            const Text('LOADING'),  
+          ],
+        ),
+      )     
     );
   }
 }
