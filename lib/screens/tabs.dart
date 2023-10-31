@@ -13,6 +13,30 @@ import 'package:payment_tracking/services/auth_service.dart';
 import 'package:payment_tracking/services/plaid_service.dart';
 import 'package:payment_tracking/widgets/integrations.dart';
 import 'package:animations/animations.dart';
+// import "package:collection/collection.dart";
+
+
+extension UtilListExtension on List{
+  groupBy(String key) {
+    try {
+      List<Map<String, dynamic>> result = [];
+      List<String> keys = [];
+
+      this.forEach((f) => keys.add(f[key]));
+
+      [...keys.toSet()].forEach((k) {
+        List data = [...this.where((e) => e[key] == k)];
+        result.add({k: data});
+      });
+
+      return result;
+    } catch (e, s) {
+      // printCatchNReport(e, s);
+      return this;
+    }
+  }
+}
+
 
 // ignore: must_be_immutable
 class PaymentsScreen extends ConsumerStatefulWidget {
@@ -28,10 +52,12 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
   final _authService = AuthService();
   final _dataService = PlaidService();
   User? _currentUser;
+  String? _selectedAccount;
+  dynamic? _transactionsGroupedByDateMap;
   late List<dynamic> _allTransactions;
   late List<dynamic> _transactions;
   late List<dynamic> _accounts;
-  String? _selectedAccount;
+  late List<String> _dateBlocks;
 
   @override
   void initState() {
@@ -41,6 +67,12 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     Future.delayed(Duration.zero, () async {
       _transactions = await _loadPlaidTransactions(_currentUser);
       _allTransactions = _transactions;
+
+      // _transactionsGroupedByDateMap = _transactions.groupBy('date');
+      // print(_transactionsGroupedByDateMap);
+      // _dateBlocks = _transactionsGroupedByDateMap.map((tx) => tx.key);
+      // print(_transactionsGroupedByDateMap); 
+
       _accounts = await _loadPlaidAccounts(_currentUser) as List<dynamic>;
       _loadPlaidItems(_currentUser);
     });
