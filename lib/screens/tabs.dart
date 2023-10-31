@@ -28,26 +28,35 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
   final _authService = AuthService();
   final _dataService = PlaidService();
   User? _currentUser;
+  late List<dynamic> _allTransactions;
+  late List<dynamic> _transactions;
+  late List<dynamic> _accounts;
+  String? _selectedAccount;
 
   @override
   void initState() {
     super.initState();
     _currentUser = _authService.currentUser;
-    Future.delayed(Duration.zero, () {
-      _loadPlaidTransactions(_currentUser);
-      _loadPlaidAccounts(_currentUser);
+    _selectedAccount = "all";
+    Future.delayed(Duration.zero, () async {
+      _transactions = await _loadPlaidTransactions(_currentUser);
+      _allTransactions = _transactions;
+      _accounts = await _loadPlaidAccounts(_currentUser) as List<dynamic>;
       _loadPlaidItems(_currentUser);
     });
   }
 
-  Future<void> _loadPlaidTransactions(User? _currentUser) async {
+  Future<List<dynamic>> _loadPlaidTransactions(User? _currentUser) async {
     Map<String, dynamic> all = await _dataService.loadAllTransactionsFromPlaid(_currentUser);
     ref.read(plaidTransactionsProvider.notifier).setData(all);
+    // todo: do NOT set data if it can be retrieved
+    return all["transactions"];
   }
 
-  Future<void> _loadPlaidAccounts(User? _currentUser) async {
+  Future<List<dynamic>> _loadPlaidAccounts(User? _currentUser) async {
     Map<String, dynamic> all = await _dataService.loadAllAccountsFromPlaid(_currentUser);
     ref.read(plaidAccountProvider.notifier).setData(all);
+    return all["accounts"];
   }
 
   Future<void> _loadPlaidItems(User? _currentUser) async {
@@ -80,15 +89,19 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> ?transactions;
-    List<dynamic> ?accounts;
+    // List<dynamic> ?transactions;
+    // List<dynamic> ?accounts;
     Map<String, dynamic> plaidJSON = ref.watch(plaidTransactionsProvider);
     Map<String, dynamic> plaidAccountJSON = ref.watch(plaidAccountProvider);
-    transactions = plaidJSON["transactions"];
-    accounts = plaidAccountJSON["accounts"];
+    // transactions = _selectedAccount=="all" ?
+    //   plaidJSON["transactions"] :
+    //   plaidJSON["transactions"].where((t) => t["account_id"] == _selectedAccount).toList();
+    // accounts = plaidAccountJSON["accounts"];
 
-    print('<!--- accounts ---!>');
-    print(accounts!.length);
+    print('<!--- _transactions ---!>');
+    print(_transactions);
+    print('<!--- _transactions.length ---!>');
+    print(_transactions!.length);
 
     return Scaffold(
       appBar: AppBar(
@@ -152,61 +165,71 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
             SizedBox(
               height: 40.0,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: ListView(
                   // This next line does the trick.
                   scrollDirection: Axis.horizontal,
                   children: <Widget>[
-                    ElevatedButton(
-                      child: Text(
-                        "All Accounts".toUpperCase(),
-                        style: TextStyle(fontSize: 14)
-                      ),
-                      style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18.0),
-                            side: BorderSide(color: Colors.red)
-                          )
-                        )
-                      ),
-                      onPressed: () => {}
-                    ),
-                    const SizedBox(width: 5),
-                    for (var account in accounts)
-                      ElevatedButton(
-                        style: ButtonStyle(
-                          foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                          backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side: BorderSide(color: Colors.red)
+                  AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 3),
+                      child: _selectedAccount == "all"
+                          ? ElevatedButton(
+                              key: ValueKey("elevated-all"),
+                              onPressed: () => { setState(() => _selectedAccount = "all") },
+                              child: Text(
+                                "ALL Accounts".toUpperCase(),
+                                style: const TextStyle(fontSize: 14)
+                              )
                             )
-                          )
-                        ),
-                        onPressed: () => {},
-                        child: Text(
-                          account?["name"].toUpperCase(),
-                          style: TextStyle(fontSize: 14)
+                          : OutlinedButton(
+                              key: ValueKey("outlined-all"),
+                              onPressed: () => { setState(() => {
+                                  _selectedAccount = "all",
+                                  _transactions = _allTransactions
+                                })
+                              },
+                              child: Text(
+                                "ALL Accounts".toUpperCase(),
+                                style: const TextStyle(fontSize: 14)
+                              ),
+                            ),
+                    ),
+                    for (var account in _accounts)
+                      //const SizedBox(width: 5),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 3),
+                          child: _selectedAccount == account?["account_id"]
+                              ? ElevatedButton(
+                                  key: ValueKey('elevated'),
+                                  onPressed: () => { setState(() => _selectedAccount = account?["account_id"]) },
+                                  child: Text(
+                                    account?["name"].toUpperCase(),
+                                    style: const TextStyle(fontSize: 14)
+                                  )
+                                )
+                              : OutlinedButton(
+                                  key: ValueKey("outlined"),
+                                  onPressed: () => { setState(() => 
+                                    _selectedAccount = account?["account_id"]),
+                                    _transactions = _allTransactions.where((t) => t["account_id"] == account?["account_id"]).toList()
+                                  },
+                                  child: Text(
+                                    account?["name"].toUpperCase(),
+                                    style: const TextStyle(fontSize: 14)
+                                  ),
+                                ),
                         )
-                      ),
-                      // const SizedBox(width: 5)
-
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 5),
-            transactions != null ? 
+            _transactions.isNotEmpty ? 
             ListView.builder(
               controller: _scrollController,
               // scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: transactions.length,
-              itemBuilder: (BuildContext context, int index) => _buildExpansionTile(transactions![index]),
+              itemCount: _transactions.length,
+              itemBuilder: (BuildContext context, int index) => _buildExpansionTile(_transactions[index]),
             ) :
             const Text('LOADING'),  
           ],
