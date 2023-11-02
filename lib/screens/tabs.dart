@@ -13,29 +13,29 @@ import 'package:payment_tracking/services/auth_service.dart';
 import 'package:payment_tracking/services/plaid_service.dart';
 import 'package:payment_tracking/widgets/integrations.dart';
 import 'package:animations/animations.dart';
-// import "package:collection/collection.dart";
+import "package:collection/collection.dart";
 
 
-extension UtilListExtension on List{
-  groupBy(String key) {
-    try {
-      List<Map<String, dynamic>> result = [];
-      List<String> keys = [];
+// extension UtilListExtension on List{
+//   groupBy(String key) {
+//     try {
+//       List<Map<String, dynamic>> result = [];
+//       List<String> keys = [];
 
-      this.forEach((f) => keys.add(f[key]));
+//       this.forEach((f) => keys.add(f[key]));
 
-      [...keys.toSet()].forEach((k) {
-        List data = [...this.where((e) => e[key] == k)];
-        result.add({k: data});
-      });
+//       [...keys.toSet()].forEach((k) {
+//         List data = [...this.where((e) => e[key] == k)];
+//         result.add({k: data});
+//       });
 
-      return result;
-    } catch (e, s) {
-      // printCatchNReport(e, s);
-      return this;
-    }
-  }
-}
+//       return result;
+//     } catch (e, s) {
+//       // printCatchNReport(e, s);
+//       return this;
+//     }
+//   }
+// }
 
 
 // ignore: must_be_immutable
@@ -53,11 +53,12 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
   final _dataService = PlaidService();
   User? _currentUser;
   String? _selectedAccount;
-  dynamic? _transactionsGroupedByDateMap;
   late List<dynamic> _allTransactions;
-  late List<dynamic> _transactions;
+  late List<dynamic> _currentTransactions;
+  late Map<String, dynamic> _transactionsGroupedByDate;
+  late Map<String, dynamic> _transactionsResponse;
+  late Map<String, dynamic> _transactionsByAccountDict;
   late List<dynamic> _accounts;
-  late List<String> _dateBlocks;
 
   @override
   void initState() {
@@ -65,24 +66,22 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     _currentUser = _authService.currentUser;
     _selectedAccount = "all";
     Future.delayed(Duration.zero, () async {
-      _transactions = await _loadPlaidTransactions(_currentUser);
-      _allTransactions = _transactions;
-
-      // _transactionsGroupedByDateMap = _transactions.groupBy('date');
-      // print(_transactionsGroupedByDateMap);
-      // _dateBlocks = _transactionsGroupedByDateMap.map((tx) => tx.key);
-      // print(_transactionsGroupedByDateMap); 
+      _transactionsResponse = await _loadPlaidTransactions(_currentUser);
+      _currentTransactions = _transactionsResponse["sortedTransactions"];
+      _allTransactions = _currentTransactions;
+      _transactionsByAccountDict = _transactionsResponse["transactionsByAccountDict"];
+      _transactionsGroupedByDate = _transactionsByAccountDict;
 
       _accounts = await _loadPlaidAccounts(_currentUser) as List<dynamic>;
       _loadPlaidItems(_currentUser);
     });
   }
 
-  Future<List<dynamic>> _loadPlaidTransactions(User? _currentUser) async {
+  Future<Map<String, dynamic>> _loadPlaidTransactions(User? _currentUser) async {
     Map<String, dynamic> all = await _dataService.loadAllTransactionsFromPlaid(_currentUser);
     ref.read(plaidTransactionsProvider.notifier).setData(all);
     // todo: do NOT set data if it can be retrieved
-    return all["transactions"];
+    return all;
   }
 
   Future<List<dynamic>> _loadPlaidAccounts(User? _currentUser) async {
@@ -97,43 +96,12 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     ref.read(plaidItemProvider.notifier).setData(all);
   }
 
-  ExpansionTile _buildExpansionTile(Map<String, dynamic> p) {
-    final GlobalKey expansionTileKey = GlobalKey();
-
-    return ExpansionTile(
-      key: expansionTileKey,
-      title: ListTile(
-        leading: Image.network(p["personal_finance_category_icon_url"]),
-        title: Text(p["name"]),
-        trailing: Text(p["amount"].toString())
-      ),
-      
-      children: <Widget>[
-        ListTile(
-          leading: Text(p["date"]),
-          // title: Text(p["category"][0]),
-          title: Text(p["personal_finance_category"]["primary"]),
-          trailing: Text(p["payment_channel"]),
-        )
-      ]
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // List<dynamic> ?transactions;
-    // List<dynamic> ?accounts;
-    Map<String, dynamic> plaidJSON = ref.watch(plaidTransactionsProvider);
-    Map<String, dynamic> plaidAccountJSON = ref.watch(plaidAccountProvider);
-    // transactions = _selectedAccount=="all" ?
-    //   plaidJSON["transactions"] :
-    //   plaidJSON["transactions"].where((t) => t["account_id"] == _selectedAccount).toList();
-    // accounts = plaidAccountJSON["accounts"];
-
-    print('<!--- _transactions ---!>');
-    print(_transactions);
-    print('<!--- _transactions.length ---!>');
-    print(_transactions!.length);
+    // print('<!--- _transactions ---!>');
+    // print(_currentTransactions);
+    // print('<!--- _transactions.length ---!>');
+    // print(_currentTransactions.length);
 
     return Scaffold(
       appBar: AppBar(
@@ -203,7 +171,9 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                   scrollDirection: Axis.horizontal,
                   children: <Widget>[
                   AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 3),
+                      switchInCurve: Curves.linear,
+                      switchOutCurve: Curves.linear,
+                      duration: Duration.zero,
                       child: _selectedAccount == "all"
                           ? ElevatedButton(
                               key: ValueKey("elevated-all"),
@@ -217,7 +187,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                               key: ValueKey("outlined-all"),
                               onPressed: () => { setState(() => {
                                   _selectedAccount = "all",
-                                  _transactions = _allTransactions
+                                  _currentTransactions = _allTransactions
                                 })
                               },
                               child: Text(
@@ -229,7 +199,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                     for (var account in _accounts)
                       //const SizedBox(width: 5),
                         AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 3),
+                          duration: Duration.zero,
                           child: _selectedAccount == account?["account_id"]
                               ? ElevatedButton(
                                   key: ValueKey('elevated'),
@@ -242,8 +212,13 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                               : OutlinedButton(
                                   key: ValueKey("outlined"),
                                   onPressed: () => { setState(() => 
-                                    _selectedAccount = account?["account_id"]),
-                                    _transactions = _allTransactions.where((t) => t["account_id"] == account?["account_id"]).toList()
+                                    _selectedAccount = account!["account_id"]),
+                                    if (_transactionsByAccountDict.containsKey(account!["account_id"])) {
+                                      _currentTransactions = _transactionsByAccountDict[account["account_id"]],
+                                      _transactionsGroupedByDate = groupBy(_currentTransactions, (obj) => obj['date'])
+                                    } else {
+                                      _currentTransactions = []
+                                    }
                                   },
                                   child: Text(
                                     account?["name"].toUpperCase(),
@@ -255,13 +230,13 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                 ),
               ),
             ),
-            _transactions.isNotEmpty ? 
+            _currentTransactions.isNotEmpty ? 
             ListView.builder(
               controller: _scrollController,
               // scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: _transactions.length,
-              itemBuilder: (BuildContext context, int index) => _buildExpansionTile(_transactions[index]),
+              itemCount: _currentTransactions.length,
+              itemBuilder: (BuildContext context, int index) => _buildExpansionTile(_currentTransactions[index]),
             ) :
             const Text('LOADING'),  
           ],
@@ -286,161 +261,26 @@ Route _createRoute() {
   );
 }
 
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:payment_tracking/providers/plaid/plaid_account_provider.dart';
-// import 'package:payment_tracking/providers/plaid/plaid_item_provider.dart';
-// import 'package:payment_tracking/providers/plaid/plaid_transactions_provider.dart';
-// import 'package:payment_tracking/screens/payments.dart';
-// import 'package:payment_tracking/services/auth_service.dart';
-// import 'package:payment_tracking/services/plaid_service.dart';
-// import 'package:payment_tracking/widgets/insights.dart';
-// import 'package:payment_tracking/widgets/integrations.dart';
+ExpansionTile _buildExpansionTile(Map<String, dynamic> p) {
+  final GlobalKey expansionTileKey = GlobalKey();
 
-// class TabsScreen extends ConsumerStatefulWidget {
-//   const TabsScreen({super.key});
+  // var groupedArray = groupBy(data, (obj) => DateTime.fromMillisecondsSinceEpoch(obj['createdAd']*1000));
 
-//   @override
-//   ConsumerState<TabsScreen> createState() {
-//     return _TabsScreenState();
-//   }
-// }
-
-// class _TabsScreenState extends ConsumerState<TabsScreen> {
-//   int _selectedPageIndex = 0;
-//   final _dataService = PlaidService();
-//   final _authService = AuthService();
-//   User? _currentUser;
-//   // final fullData = ref.watch(fullDataProvider);
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _currentUser = _authService.currentUser;
-//     Future.delayed(Duration.zero, () {
-//       _loadPlaidTransactions(_currentUser);
-//       _loadPlaidAccounts(_currentUser);
-//       _loadPlaidItems(_currentUser);
-//     });
-//   }
-
-//   Future<void> _loadPlaidTransactions(User? _currentUser) async {
-//     Map<String, dynamic> all = await _dataService.loadAllTransactionsFromPlaid(_currentUser);
-//     ref.read(plaidTransactionsProvider.notifier).setData(all);
-//   }
-
-//   Future<void> _loadPlaidAccounts(User? _currentUser) async {
-//     Map<String, dynamic> all = await _dataService.loadAllAccountsFromPlaid(_currentUser);
-//     ref.read(plaidAccountProvider.notifier).setData(all);
-//   }
-
-//   Future<void> _loadPlaidItems(User? _currentUser) async {
-//     Map<String, dynamic> all = await _dataService.loadAllItemsFromPlaid(_currentUser);
+  return ExpansionTile(
+    key: expansionTileKey,
+    title: ListTile(
+      leading: Image.network(p["personal_finance_category_icon_url"]),
+      title: Text(p["name"]),
+      trailing: Text(p["amount"].toString())
+    ),
     
-//     ref.read(plaidItemProvider.notifier).setData(all);
-//   }
-  
-  
-//   void _selectPage(int index) {
-//     setState(() {
-//       _selectedPageIndex = index;
-//     });
-//   }
-
-//   void _goInsights() async {
-//     await Navigator.of(context).push(
-//       MaterialPageRoute(
-//         builder: (ctx) => const Insights(),
-//       )
-//     );
-//   }
-
-//   void _goIntegrations() async {
-//     await Navigator.of(context).push(
-//       MaterialPageRoute(
-//         builder: (ctx) => const Integrations(),
-//       )
-//     );
-//   }
-
-//   @override 
-//   Widget build(BuildContext context) {
-//     Widget activePage;
-
-//     switch(_selectedPageIndex) {
-//       case 0: {
-//         activePage = const PaymentsScreen();
-//       }
-//       break;
-//       case 1: {
-//         activePage = const Integrations();
-//       }
-//       break;
-//       default: {
-//         activePage = const PaymentsScreen();
-//       }
-//       break;
-//     }
-
-//     return Scaffold(
-//       // appBar: AppBar(
-//       //   title: const Text("ITS THE MAIN HEADER"),
-//       //   // leading: IconButton(
-//       //   //   icon: const Icon(Icons.add),
-//       //   //   onPressed: activeAddFunction,
-//       //   // ),
-//       // ),
-//       drawer: Drawer(
-//         child: ListView(
-//           padding: EdgeInsets.zero,
-//           children: <Widget>[
-//             const DrawerHeader(
-//               decoration: BoxDecoration(
-//                 color: Colors.blue,
-//               ),
-//               curve: Curves.fastOutSlowIn,
-//               child: Text(
-//                 'Drawer Header',
-//                 style: TextStyle(
-//                   color: Colors.white,
-//                   fontSize: 24,
-//                 ),
-//               ),
-//             ),
-//             const ListTile(
-//               leading: Icon(Icons.attach_money),
-//               title: Text('Goals')
-//             ),
-//             ListTile(
-//               leading: const Icon(Icons.insights),
-//               title: const Text('Insights'),
-//               onTap: _goInsights,
-//             ),
-//             ListTile(
-//               leading: const Icon(Icons.sync),
-//               title: const Text('Integrations'),
-//               onTap: _goIntegrations,
-//             ),
-//             ListTile(
-//               leading: const Icon(Icons.logout),
-//               title: const Text('Logout'),
-//               onTap: _authService.logOut,
-//             ),
-//           ],
-//         ),
-//       ),
-
-//       body: activePage,
-//       bottomNavigationBar: BottomNavigationBar(
-//         onTap: _selectPage,
-//         type: BottomNavigationBarType.fixed,
-//         currentIndex: _selectedPageIndex,
-//         items: const [
-//           BottomNavigationBarItem(icon: Icon(Icons.paid), label: "Transactions"),
-//           BottomNavigationBarItem(icon: Icon(Icons.category), label: "Integrations"),     
-//         ],
-//       ),
-//     );
-//   }
-// }
+    children: <Widget>[
+      ListTile(
+        leading: Text(p["date"]),
+        // title: Text(p["category"][0]),
+        title: Text(p["personal_finance_category"]["primary"]),
+        trailing: Text(p["payment_channel"]),
+      )
+    ]
+  );
+}
