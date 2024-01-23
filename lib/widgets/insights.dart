@@ -21,11 +21,40 @@ class _InsightsState extends ConsumerState<Insights> {
   final _dataService = DataService();
   var _selectedPaymentMethod;
   var _selectedCategory;
-  DateTime _selectedStartDate = DateTime.now().subtract(const Duration(days: 7));
-  DateTime _selectedEndDate = DateTime.now();
+  DateTime _selectedStartDate = getInitialStart();
+  DateTime _selectedEndDate = DateTime.now(); // will need to solve currentYear at some point at the end of the year
   var _isQuerying = false;
   var _queriedPayments = [];
   var _totalSpend = 0;
+
+  static DateTime getInitialStart() {
+    int currentYear = DateTime.now().year;
+    int currentMonth = DateTime.now().month;
+    int currentDay = DateTime.now().day;
+
+    // if current day is after the 15th, back track start date to 15th of the current month
+    // if current day is before the 15th, back track start date to last of day of prior month
+    if (currentDay >= 15) {
+      DateTime projectedDay = DateTime.utc(currentYear, currentMonth, 15);
+      if (projectedDay.weekday == DateTime.sunday) {
+        return DateTime.utc(currentYear, currentMonth, 13);
+      } else if (projectedDay.weekday == DateTime.saturday) {
+        return DateTime.utc(currentYear, currentMonth, 14);
+      } else {
+        return projectedDay;
+      }
+    } else {
+      DateTime projectedDay = DateTime.utc(currentYear, currentMonth-1, 0);
+      if (projectedDay.weekday == DateTime.sunday) {
+        return DateTime.utc(currentYear, currentMonth-1, -2);
+      } else if (projectedDay.weekday == DateTime.saturday) {
+        return DateTime.utc(currentYear, currentMonth-1, -1);
+      } else {
+        return projectedDay;
+      }
+    }
+
+  }
 
   Future<void> _selectStartDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -74,6 +103,18 @@ class _InsightsState extends ConsumerState<Insights> {
     setState(() {
       _queriedPayments = queriedPayments;
       _totalSpend = totalSpend;
+      _isQuerying = false;
+    });
+  }
+
+  void _purge() async {
+    setState(() {
+      _isQuerying = true;
+    });
+
+    await _dataService.purge();
+
+    setState(() {
       _isQuerying = false;
     });
   }
@@ -192,6 +233,15 @@ class _InsightsState extends ConsumerState<Insights> {
                           width: 16, 
                           child: CircularProgressIndicator()
                         ) : const Text('Search')
+                    ),
+                    ElevatedButton(
+                      onPressed: _isQuerying ? null : _purge, 
+                      child: _isQuerying 
+                        ? const SizedBox(
+                          height: 16, 
+                          width: 16, 
+                          child: CircularProgressIndicator()
+                        ) : const Text('PURGE')
                     )
                   ],
                 ),

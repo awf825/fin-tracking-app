@@ -211,6 +211,20 @@ class DataService {
     }
   }
 
+  Future<void> purge() async {
+    // get all payments older than a month
+    QuerySnapshot querySnapshot = await _db.collection('payment')
+      .where("date", isLessThanOrEqualTo: DateTime.now().subtract(const Duration(days: 40)))
+      .get(); 
+
+    for (var doc in querySnapshot.docs) {
+      print('<!-- doc.id --!>');
+      print(doc.id);
+      final docRef = doc.reference;
+      await docRef.delete();
+    }
+  }
+
   void insertUser(user) async {
     QuerySnapshot querySnapshot = await _db.collection('users')
       .where("email", isEqualTo: user["email"])
