@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_tracking/models/payment.dart';
@@ -27,6 +28,7 @@ class _EditPaymentState extends ConsumerState<EditPayment> {
   var _enteredAmount;  
   var _selectedCategory;
   var _selectedPaymentMethod;
+  late DateTime _selectedDateTime;
   var _isSending = false;
 
   void _saveItem() async {
@@ -36,6 +38,8 @@ class _EditPaymentState extends ConsumerState<EditPayment> {
       setState(() {
         _isSending = true;
       });
+
+      print(_selectedDateTime);
 
       final payment = Payment(
         id: widget.payment.id,
@@ -56,6 +60,8 @@ class _EditPaymentState extends ConsumerState<EditPayment> {
     } 
   }
 
+  TextEditingController _dateController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final categories = ref.read(categoryProvider);
@@ -64,6 +70,24 @@ class _EditPaymentState extends ConsumerState<EditPayment> {
     _enteredAmount = widget.payment.amount.toString();  
     _selectedCategory = widget.payment.categoryId;
     _selectedPaymentMethod = widget.payment.paymentMethodId;
+    _selectedDateTime = widget.payment.date.toDate();
+
+    Future<void> _selectDate() async {
+      DateTime? _picked = await showDatePicker(
+        context: context, 
+        initialDate: DateTime.now(), 
+        firstDate: DateTime(2023), 
+        lastDate: DateTime(2100)
+      );
+
+      if (_picked != null) {
+        setState(() {
+          _dateController.text = _picked.toString().split(" ")[0];
+          // _selectedDateTime = _picked;
+        });
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit payment'),
@@ -153,7 +177,7 @@ class _EditPaymentState extends ConsumerState<EditPayment> {
                   Expanded(
                     child: DropdownButtonFormField(
                       decoration: const InputDecoration(
-                        label: Text('Payment Method')
+                        label: Text('Payment Method'),
                       ),
                       value: _selectedPaymentMethod,
                       items: [
@@ -165,13 +189,39 @@ class _EditPaymentState extends ConsumerState<EditPayment> {
                                 const SizedBox(width: 6),
                                 Text(method.name)
                               ]
-                            )
+                            ),
                           )
                       ],
                       onChanged: (value) {
                         _selectedPaymentMethod = value!;
+                      }
+                    )
+                  )
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _dateController,
+                      decoration: const InputDecoration(
+                        labelText: "Payment Date",
+                        filled: true,
+                        prefixIcon: Icon(Icons.calendar_today),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide.none
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue)
+                        )
+                      ),
+                      readOnly: true,
+                      onTap: () {
+                        _selectDate();
                       },
-                    ),
+                    )
                   )
                 ],
               ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:payment_tracking/models/category.dart';
 import 'package:payment_tracking/models/income_stream.dart';
 import 'package:payment_tracking/models/payment.dart';
@@ -129,7 +130,17 @@ class DataService {
   }
 
   Future updatePayment(Payment payment) async {
+    // print(payment.date);
+    int totalSeconds = payment.date.seconds;
+    // this adds all the seconds (nanoToSecs + _seconds) together
+
+    int milliSeconds = totalSeconds * 1000;
+    // this converts seconds to microseconds
+
+
     await _db.collection('payment').doc(payment.id).update({
+      // "date": payment.date,
+      // "date": DateTime.fromMillisecondsSinceEpoch(milliSeconds),
       "paymentMethodId": payment.paymentMethodId,
       "categoryId": payment.categoryId,
       "recipient": payment.recipient,
