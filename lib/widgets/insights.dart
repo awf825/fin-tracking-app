@@ -198,52 +198,54 @@ class _InsightsState extends ConsumerState<Insights> {
                                 icon: const Icon(Icons.calendar_month_rounded)
                               )
                             ],
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Text("${_selectedEndDate.toLocal()}".split(' ')[0]),
+                              IconButton(
+                                onPressed: () => _selectEndDate(context),
+                                icon: const Icon(Icons.calendar_month_rounded)
+                              )
+                          ],
                           )
                         ],
                       ),
                     ),
                     Expanded(
                       child: Column(
-                        // mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Row(
-                            children: [
-                              Text("${_selectedEndDate.toLocal()}".split(' ')[0]),
-                              IconButton(
-                                onPressed: () => _selectEndDate(context),
-                                icon: const Icon(Icons.calendar_month_rounded)
-                              )
+                            children: <Widget>[
+                                Text('Spend: \$$_totalSpend')
                             ],
+                          ),
+                          Row(
+                            children: <Widget>[
+                              ElevatedButton(
+                                  onPressed: _isQuerying ? null : _query, 
+                                  child: _isQuerying 
+                                    ? const SizedBox(
+                                      height: 16, 
+                                      width: 16, 
+                                      child: CircularProgressIndicator()
+                                    ) : const Text('Search')
+                              ),
+                              const SizedBox(width: 12),
+                              ElevatedButton(
+                                onPressed: _isQuerying ? null : _purge, 
+                                child: _isQuerying 
+                                  ? const SizedBox(
+                                    height: 16, 
+                                    width: 16, 
+                                    child: CircularProgressIndicator()
+                                  ) : const Text('PURGE')
+                              )
+                          ],
                           )
                         ],
                       ),
                     )
                   ]
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround, // make sure row content is pushed all the way to the right
-                  children: [
-                    Text('Spend: \$$_totalSpend'),
-                    ElevatedButton(
-                      onPressed: _isQuerying ? null : _query, 
-                      child: _isQuerying 
-                        ? const SizedBox(
-                          height: 16, 
-                          width: 16, 
-                          child: CircularProgressIndicator()
-                        ) : const Text('Search')
-                    ),
-                    ElevatedButton(
-                      onPressed: _isQuerying ? null : _purge, 
-                      child: _isQuerying 
-                        ? const SizedBox(
-                          height: 16, 
-                          width: 16, 
-                          child: CircularProgressIndicator()
-                        ) : const Text('PURGE')
-                    )
-                  ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -257,27 +259,15 @@ class _InsightsState extends ConsumerState<Insights> {
                             itemBuilder: (BuildContext context, int index) => 
                               // Text(_queriedPayments[index].name)
                               ListTile(
-                                title: Text(_queriedPayments[index].recipient),
-                                subtitle: Text(_queriedPayments[index].readAmount()),
+                                leading: Text(_queriedPayments[index].readAmount()),
+                                trailing: Text(_queriedPayments[index].readDate()),
+                                title: Text(_queriedPayments[index].recipient)
                               )
                             
                           ) : 
                           const Text("Nothing to display"),
                       )
                     )
-                    // _queriedPayments.isNotEmpty ?
-                    // ListView.builder(
-                    //   itemCount: _queriedPayments.length,
-                    //   itemBuilder: (BuildContext context, int index) => 
-                    //     // Text(_queriedPayments[index].name)
-                    //     ListTile(
-                    //       title: Text(_queriedPayments[index].name),
-                    //       subtitle: Text(_queriedPayments[index].description),
-                    //     )
-                      
-                    // ) : 
-                    // const Text("Nothing to display"),
-
                   ]
                 )
             ]

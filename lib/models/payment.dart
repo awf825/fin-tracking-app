@@ -42,6 +42,10 @@ class Payment extends AppModel {
     return '\$$amount';
   }
 
+  PaymentMethod? readPaymentMethod() {
+    return paymentMethod;
+  }
+
   factory Payment.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
     SnapshotOptions? options,
