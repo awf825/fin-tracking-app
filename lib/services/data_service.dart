@@ -200,8 +200,8 @@ class DataService {
       .get();
 
       for (var doc in querySnapshot.docs) {
-        print('<!-- doc.id --!>');
-        print(doc.id);
+        // print('<!-- doc.id --!>');
+        // print(doc.id);
         final id = doc.id;
         final data = doc.data() as Map;
         Payment payment = Payment(

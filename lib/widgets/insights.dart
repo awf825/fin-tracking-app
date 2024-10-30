@@ -143,6 +143,15 @@ class _InsightsState extends ConsumerState<Insights> {
                         ),
                         value: _selectedPaymentMethod,
                         items: [
+                          const DropdownMenuItem(
+                              value: null,
+                              child: Row(
+                                children: [
+                                  SizedBox(width: 6),
+                                  Text('ALL')
+                                ]
+                              )
+                          ),
                           for (final method in paymentMethods) 
                             DropdownMenuItem(
                               value: method.id,
@@ -155,7 +164,7 @@ class _InsightsState extends ConsumerState<Insights> {
                             )
                         ],
                         onChanged: (value) {
-                          _selectedPaymentMethod = value!;
+                          _selectedPaymentMethod = value;
                         },
                       ),
                     ),
@@ -166,6 +175,15 @@ class _InsightsState extends ConsumerState<Insights> {
                         ),
                         value: _selectedCategory,
                         items: [
+                          const DropdownMenuItem(
+                              value: null,
+                              child: Row(
+                                children: [
+                                  SizedBox(width: 6),
+                                  Text('ALL')
+                                ]
+                              )
+                          ),
                           for (final category in categories)
                             DropdownMenuItem(
                               value: category.id,
@@ -178,7 +196,7 @@ class _InsightsState extends ConsumerState<Insights> {
                             )
                         ],
                         onChanged: (value) {
-                          _selectedCategory = value!;
+                          _selectedCategory = value;
                         },
                       ),
                     )
