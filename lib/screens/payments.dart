@@ -70,7 +70,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     return ExpansionTile(
       key: expansionTileKey,
       title: ListTile(
-        leading: Text(p.paymentMethod!.name),
+        leading: Text(p.category!.name),
         title: Text(p.recipient)
       ),
       
@@ -81,7 +81,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
             icon: const Icon(Icons.edit),
             onPressed: () => editPayment(p),
           ),
-          title: Text(p.category!.name),
+          title: Text(p.paymentMethod!.name),
           subtitle: Text(p.readDate()),
           trailing: Text(p.readAmount()),
         )

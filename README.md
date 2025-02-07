@@ -4,6 +4,7 @@ A new Flutter project.
 
 ## Getting Started
 ```
+    rm -R ~/Library/Developer/CoreSimulator/Caches
     open -a Simulator
     flutter run
 ```
